@@ -164,3 +164,122 @@ if not st.session_state.logged_in:
         landing_page()
 else:
     st.write(f"Logged in as {st.session_state.users_db[st.session_state.current_user]['name']}!")
+
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+# -----------------------------
+# Page config
+# -----------------------------
+st.set_page_config(page_title="NiDAH Portal", layout="wide")
+
+# -----------------------------
+# Dummy users (replace with DB later)
+# -----------------------------
+# Format: username, password, role
+users_db = [
+    {"username": "admin", "password": "admin123", "role": "admin"},
+    {"username": "user1", "password": "user123", "role": "user"},
+]
+
+# -----------------------------
+# Login page
+# -----------------------------
+def login_page():
+    st.title("NiDAH Portal Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Sign In"):
+        for user in users_db:
+            if user["username"] == username and user["password"] == password:
+                st.session_state["logged_in"] = True
+                st.session_state["username"] = username
+                st.session_state["role"] = user["role"]
+                st.experimental_rerun()
+        st.error("Invalid username or password")
+        
+# -----------------------------
+# Logout function
+# -----------------------------
+def logout():
+    for key in ["logged_in", "username", "role"]:
+        if key in st.session_state:
+            del st.session_state[key]
+    st.experimental_rerun()
+
+# -----------------------------
+# Initialize session state
+# -----------------------------
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+# -----------------------------
+# Main App
+# -----------------------------
+if not st.session_state["logged_in"]:
+    login_page()
+else:
+    st.sidebar.write(f"Welcome, {st.session_state['username']}")
+    if st.sidebar.button("Logout"):
+        logout()
+
+    role = st.session_state["role"]
+
+    if role == "admin":
+        # Admin Dashboard
+        st.header("Admin Dashboard")
+        
+        # --------- Dummy data ---------
+        states = ["Lagos", "Abuja", "Kano", "Oyo", "Rivers"]
+        facilities = pd.DataFrame({
+            "Facility": [f"Facility {i}" for i in range(1,21)],
+            "State": [states[i%5] for i in range(20)]
+        })
+        volunteers = pd.DataFrame({
+            "Volunteer": [f"Volunteer {i}" for i in range(1,31)],
+            "State": [states[i%5] for i in range(30)]
+        })
+        # --------- KPIs ---------
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Facilities Registered", facilities["Facility"].nunique())
+        col2.metric("Volunteers Registered", volunteers["Volunteer"].nunique())
+        col3.metric("Matched Volunteers", 12)
+
+        # --------- State filter ---------
+        state_filter = st.selectbox("Select State", ["All"] + states)
+        if state_filter != "All":
+            facilities = facilities[facilities["State"]==state_filter]
+            volunteers = volunteers[volunteers["State"]==state_filter]
+
+        # --------- Charts ---------
+        col_chart1, col_chart2 = st.columns(2)
+        with col_chart1:
+            st.subheader("Facilities by State")
+            fig = px.bar(facilities.groupby("State")["Facility"].count().reset_index(),
+                         x="State", y="Facility", text="Facility", color="Facility")
+            st.plotly_chart(fig, use_container_width=True)
+        with col_chart2:
+            st.subheader("Volunteers by State")
+            fig2 = px.bar(volunteers.groupby("State")["Volunteer"].count().reset_index(),
+                         x="State", y="Volunteer", text="Volunteer", color="Volunteer")
+            st.plotly_chart(fig2, use_container_width=True)
+
+    elif role == "user":
+        # Regular User View
+        st.header("NiDAH Program Registration")
+        st.markdown("""
+        Welcome to the **NiDAH Portal**. Here you can register for the health programs you are interested in.
+        """)
+        with st.form("program_signup"):
+            full_name = st.text_input("Full Name")
+            location = st.text_input("Location")
+            specialty = st.text_input("Specialty")
+            qualification = st.text_input("Qualification")
+            program_choice = st.multiselect("Select Programs", 
+                                            ["Training", "Advanced Procedures", "Other Interests",
+                                             "Maternal & Child Health", "Digital Health Training",
+                                             "Telemedicine Expansion", "Health Facility Upgrades"])
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                st.success(f"Thank you {full_name}, you have successfully registered for: {', '.join(program_choice)}")
