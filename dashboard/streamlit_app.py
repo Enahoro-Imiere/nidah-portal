@@ -1,19 +1,19 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 import altair as alt
+from datetime import datetime
 
 # -----------------------------
 # Page configuration
 # -----------------------------
 st.set_page_config(
     page_title="NiDAH Portal",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # -----------------------------
-# Session state initialization
+# Session state
 # -----------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -23,10 +23,11 @@ if "current_user" not in st.session_state:
     st.session_state.current_user = None
 if "signup_mode" not in st.session_state:
     st.session_state.signup_mode = False
+
+# In-memory user database
 if "users_db" not in st.session_state:
     st.session_state.users_db = {
         "admin": {"password": "admin123", "role": "admin", "name": "Admin User"},
-        "user": {"password": "user123", "role": "user", "name": "Field Assessor"}
     }
 
 # -----------------------------
@@ -35,24 +36,19 @@ if "users_db" not in st.session_state:
 def overview_page():
     col1, col2 = st.columns([2,1])
     with col1:
-        st.markdown(
-        """
-        ## Nigerians in Diaspora Advanced Health Programme (NiDAH)
-
-        Nigeria's health system faces serious challenges: shortage of skilled health workers, 
-        infrastructural deficits, and gaps in specialized medical services. A key factor is the 
-        emigration of highly trained professionals seeking better opportunities abroad ("japa"). 
-
-        Meanwhile, Nigeria has a vast, highly skilled diaspora of doctors, nurses, pharmacists, 
-        and allied health professionals contributing globally. This talent is underutilized for 
-        national development.
-
-        The NiDAH initiative creates a structured mechanism to engage diaspora health workers, 
-        offering short-term engagements to strengthen Nigeria's health system. This portal 
-        facilitates **facility profiling**, **program registration**, and **national reporting** 
-        to bridge the gap between brain drain and national healthcare development.
-        """
-        )
+        st.markdown("""
+        <div style="background-color:#F0F8FF; padding:20px; border-radius:10px;">
+            <h2 style="color:#1E3A8A;">Nigerians in Diaspora Advanced Health Programme (NiDAH)</h2>
+            <p style="color:#2E8B57; font-size:16px;">
+            Nigeria's health system faces challenges: shortage of skilled workers, infrastructural deficits, 
+            and gaps in specialized medical services. Emigration of highly trained professionals ("japa") worsens the gap.
+            </p>
+            <p style="color:#2E8B57; font-size:16px;">
+            NiDAH engages diaspora health workers for short-term contributions, strengthening the system. 
+            This portal supports facility profiling, program registration, and national reporting.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     with col2:
         st.image("https://upload.wikimedia.org/wikipedia/commons/6/6b/Nigeria_Flag.png", width=200)
 
@@ -60,7 +56,7 @@ def overview_page():
 # Login page
 # -----------------------------
 def login_page():
-    st.markdown("<h1 style='color:navy'>NiDAH Portal</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color:#1E3A8A;'>NiDAH Portal</h1>", unsafe_allow_html=True)
     st.write("### Sign In")
     
     username_input = st.text_input("Username")
@@ -81,7 +77,7 @@ def login_page():
         if st.button("Sign Up"):
             st.session_state.signup_mode = True
         if st.button("Forgot Password"):
-            st.info("Password reset feature not implemented in this mock portal.")
+            st.info("Password reset feature not implemented in this dummy portal.")
 
 # -----------------------------
 # Sign up page
@@ -117,34 +113,21 @@ def user_dashboard():
         st.session_state.user_role = None
         st.session_state.current_user = None
         st.experimental_rerun()
+    
+    menu = st.sidebar.radio("Navigation", ["Dashboard", "Health Programs"])
 
-    menu = st.sidebar.radio(
-        "Navigation",
-        ["Dashboard", "Health Programs"]
-    )
-
-    # --- Mock Data ---
+    # Mock programs
     programs = [
         {"Program": "Maternal & Child Health", "Status": "Active"},
         {"Program": "Digital Health Training", "Status": "Active"},
         {"Program": "Telemedicine Expansion", "Status": "Planned"},
-        {"Program": "Health Facility Upgrades", "Status": "Ongoing"},
-        {"Program": "Orthopaedics", "Status": "Active"},
-        {"Program": "Intervention Radiology", "Status": "Active"},
-        {"Program": "Cardiac Care", "Status": "Planned"},
-        {"Program": "Neurology", "Status": "Active"},
-        {"Program": "Urology", "Status": "Planned"},
-        {"Program": "General Surgery", "Status": "Ongoing"},
-        {"Program": "Training", "Status": "Active"},
-        {"Program": "Advanced Procedures", "Status": "Planned"},
-        {"Program": "Other Interest", "Status": "Ongoing"}
+        {"Program": "Health Facility Upgrades", "Status": "Ongoing"}
     ]
-
     programs_df = pd.DataFrame(programs)
 
     if menu == "Dashboard":
         st.subheader(f"Welcome {st.session_state.current_user}!")
-        st.write("Use the Health Programs menu to register for programs.")
+        st.write("Use Health Programs menu to register.")
 
     if menu == "Health Programs":
         st.subheader("Available Health Programs")
@@ -166,21 +149,15 @@ def user_dashboard():
 # -----------------------------
 def admin_dashboard():
     st.sidebar.title("NiDAH Portal (Admin)")
-    
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user_role = None
         st.session_state.current_user = None
         st.experimental_rerun()
-
-    menu = st.sidebar.radio(
-        "Navigation",
-        ["Dashboard", "Health Programs", "Reports", "Users"]
-    )
-
-    st.title("Admin Dashboard")
-
-    # --- Mock Data ---
+    
+    menu = st.sidebar.radio("Navigation", ["Dashboard", "Health Programs", "Reports", "Users"])
+    
+    # Mock data for charts and KPIs
     months = ["Jan", "Feb", "Mar", "Apr", "May"]
     states = ["Lagos", "Abuja", "Kano", "Oyo"]
 
@@ -190,115 +167,45 @@ def admin_dashboard():
         "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
     })
 
-    volunteers_data = pd.DataFrame({
-        "Month": months,
-        "Volunteers Registered": [30, 60, 120, 200, 320],
-        "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
-    })
+    # KPI cards
+    st.subheader("KPI Metrics")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Registered Facilities", facility_data["Facilities Registered"].sum())
+    col2.metric("Registered Volunteers", 300)
+    col3.metric("Matched Volunteers", 150)
+    col4.metric("Trained Health Workers", 75)
 
-    matched_data = pd.DataFrame({
-        "Month": months,
-        "Matched Volunteers": [5, 20, 50, 120, 210],
-        "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
-    })
+    st.subheader("KPI Charts")
+    col1, col2 = st.columns(2)
 
-    trained_data = pd.DataFrame({
-        "Month": months,
-        "Trained Health Workers": [10, 20, 30, 50, 75],
-        "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
-    })
+    chart1 = alt.Chart(facility_data).mark_bar(color="#2E8B57").encode(
+        x="Month",
+        y="Facilities Registered",
+        tooltip=["Month","Facilities Registered"]
+    ).properties(width=650,height=450).configure_view(strokeWidth=4,stroke="black",fill="white")
 
-    facilities_by_state = pd.DataFrame({
-        "State": ["Lagos", "Abuja", "Kano", "Oyo", "Lagos", "Abuja"],
-        "Facility": ["F1", "F2", "F3", "F4", "F5", "F6"],
-        "Count": [50, 30, 20, 15, 78, 45]
-    })
+    chart2 = alt.Chart(facility_data).mark_line(color="#1E3A8A",point=True).encode(
+        x="Month",
+        y="Facilities Registered",
+        tooltip=["Month","Facilities Registered"]
+    ).properties(width=650,height=450).configure_view(strokeWidth=4,stroke="black",fill="white")
 
-    if menu == "Dashboard":
-        st.subheader("Filter by State")
-        selected_state = st.radio("Select State", ["All"] + states, horizontal=True)
+    col1.altair_chart(chart1,use_container_width=True)
+    col2.altair_chart(chart2,use_container_width=True)
 
-        # Filter datasets based on state selection
-        if selected_state != "All":
-            facility_data_filtered = facility_data[facility_data["State"] == selected_state]
-            volunteers_data_filtered = volunteers_data[volunteers_data["State"] == selected_state]
-            matched_data_filtered = matched_data[matched_data["State"] == selected_state]
-            trained_data_filtered = trained_data[trained_data["State"] == selected_state]
-            facilities_by_state_filtered = facilities_by_state[facilities_by_state["State"] == selected_state]
-        else:
-            facility_data_filtered = facility_data
-            volunteers_data_filtered = volunteers_data
-            matched_data_filtered = matched_data
-            trained_data_filtered = trained_data
-            facilities_by_state_filtered = facilities_by_state
-
-        # KPI cards
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Registered Facilities", facility_data_filtered["Facilities Registered"].sum())
-        col2.metric("Registered Volunteers", volunteers_data_filtered["Volunteers Registered"].sum())
-        col3.metric("Matched Volunteers", matched_data_filtered["Matched Volunteers"].sum())
-        col4.metric("Trained Health Workers", trained_data_filtered["Trained Health Workers"].sum())
-
-        st.subheader("KPI Charts")
-        col1, col2 = st.columns(2)
-
-        highlight = alt.selection_single(on="mouseover", fields=["Month"], nearest=True, empty="none")
-
-        chart1 = alt.Chart(facility_data_filtered).mark_line(point=True, color="#2E8B57", size=5).encode(
-            x=alt.X("Month", title="Month"),
-            y=alt.Y("Facilities Registered", title="Facilities Registered"),
-            tooltip=["Month", "Facilities Registered"]
-        ).add_selection(highlight).interactive().properties(height=450, width=650).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
-
-        chart2 = alt.Chart(volunteers_data_filtered).mark_line(point=True, color="#1E3A8A", size=5).encode(
-            x=alt.X("Month", title="Month"),
-            y=alt.Y("Volunteers Registered", title="Volunteers Registered"),
-            tooltip=["Month", "Volunteers Registered"]
-        ).add_selection(highlight).interactive().properties(height=450, width=650).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
-
-        col1.altair_chart(chart1, use_container_width=True)
-        col2.altair_chart(chart2, use_container_width=True)
-
-        col3, col4 = st.columns(2)
-
-        chart3 = alt.Chart(matched_data_filtered).mark_area(color="#FF8C00", opacity=0.6).encode(
-            x=alt.X("Month", title="Month"),
-            y=alt.Y("Matched Volunteers", title="Matched Volunteers"),
-            tooltip=["Month", "Matched Volunteers"]
-        ).add_selection(highlight).interactive().properties(height=450, width=650).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
-
-        chart4 = alt.Chart(trained_data_filtered).mark_bar(color="#20B2AA").encode(
-            x=alt.X("Month", title="Month"),
-            y=alt.Y("Trained Health Workers", title="Trained Health Workers"),
-            tooltip=["Month", "Trained Health Workers"]
-        ).add_selection(highlight).interactive().properties(height=450, width=650).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
-
-        col3.altair_chart(chart3, use_container_width=True)
-        col4.altair_chart(chart4, use_container_width=True)
-
-        st.subheader("Facilities Registered by State")
-        chart_state = alt.Chart(facilities_by_state_filtered).mark_bar(color="#FF4500").encode(
-            x=alt.X("Facility", title="Facility"),
-            y=alt.Y("Count", title="Number of Facilities"),
-            tooltip=["Facility", "State", "Count"]
-        ).properties(height=450, width=1300).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
-
-        st.altair_chart(chart_state, use_container_width=True)
-
-    elif menu == "Health Programs":
-        st.subheader("Health Programs Supported")
-        programs_df = pd.DataFrame([
-            {"Program": "Orthopaedics"},
-            {"Program": "Intervention Radiology"},
-            {"Program": "Cardiac Care"},
-            {"Program": "Neurology"},
-            {"Program": "Urology"},
-            {"Program": "General Surgery"}
-        ])
-        st.dataframe(programs_df, use_container_width=True)
+    st.subheader("Health Programs")
+    programs_df = pd.DataFrame([
+        {"Program": "Orthopaedics"},
+        {"Program": "Intervention Radiology"},
+        {"Program": "Cardiac Care"},
+        {"Program": "Neurology"},
+        {"Program": "Urology"},
+        {"Program": "General Surgery"}
+    ])
+    st.dataframe(programs_df,use_container_width=True)
 
 # -----------------------------
-# Main app flow
+# Main flow
 # -----------------------------
 if not st.session_state.logged_in:
     overview_page()
