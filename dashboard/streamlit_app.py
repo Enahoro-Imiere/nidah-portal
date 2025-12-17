@@ -33,10 +33,12 @@ if "users_db" not in st.session_state:
 # Overview page
 # -----------------------------
 def overview_page():
-    st.markdown(
+    col1, col2 = st.columns([2,1])
+    with col1:
+        st.markdown(
         """
         ## Nigerians in Diaspora Advanced Health Programme (NiDAH)
-        
+
         Nigeria's health system faces serious challenges: shortage of skilled health workers, 
         infrastructural deficits, and gaps in specialized medical services. A key factor is the 
         emigration of highly trained professionals seeking better opportunities abroad ("japa"). 
@@ -49,9 +51,10 @@ def overview_page():
         offering short-term engagements to strengthen Nigeria's health system. This portal 
         facilitates **facility profiling**, **program registration**, and **national reporting** 
         to bridge the gap between brain drain and national healthcare development.
-        """,
-        unsafe_allow_html=True
-    )
+        """
+        )
+    with col2:
+        st.image("https://upload.wikimedia.org/wikipedia/commons/6/6b/Nigeria_Flag.png", width=200)
 
 # -----------------------------
 # Login page
@@ -59,7 +62,7 @@ def overview_page():
 def login_page():
     st.markdown("<h1 style='color:navy'>NiDAH Portal</h1>", unsafe_allow_html=True)
     st.write("### Sign In")
-
+    
     username_input = st.text_input("Username")
     password_input = st.text_input("Password", type="password")
     
@@ -103,6 +106,60 @@ def signup_page():
                 }
                 st.success("Account created successfully! Please login.")
                 st.session_state.signup_mode = False
+
+# -----------------------------
+# User dashboard
+# -----------------------------
+def user_dashboard():
+    st.sidebar.title("NiDAH Portal (User)")
+    if st.sidebar.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.user_role = None
+        st.session_state.current_user = None
+        st.experimental_rerun()
+
+    menu = st.sidebar.radio(
+        "Navigation",
+        ["Dashboard", "Health Programs"]
+    )
+
+    # --- Mock Data ---
+    programs = [
+        {"Program": "Maternal & Child Health", "Status": "Active"},
+        {"Program": "Digital Health Training", "Status": "Active"},
+        {"Program": "Telemedicine Expansion", "Status": "Planned"},
+        {"Program": "Health Facility Upgrades", "Status": "Ongoing"},
+        {"Program": "Orthopaedics", "Status": "Active"},
+        {"Program": "Intervention Radiology", "Status": "Active"},
+        {"Program": "Cardiac Care", "Status": "Planned"},
+        {"Program": "Neurology", "Status": "Active"},
+        {"Program": "Urology", "Status": "Planned"},
+        {"Program": "General Surgery", "Status": "Ongoing"},
+        {"Program": "Training", "Status": "Active"},
+        {"Program": "Advanced Procedures", "Status": "Planned"},
+        {"Program": "Other Interest", "Status": "Ongoing"}
+    ]
+
+    programs_df = pd.DataFrame(programs)
+
+    if menu == "Dashboard":
+        st.subheader(f"Welcome {st.session_state.current_user}!")
+        st.write("Use the Health Programs menu to register for programs.")
+
+    if menu == "Health Programs":
+        st.subheader("Available Health Programs")
+        st.dataframe(programs_df, use_container_width=True)
+
+        st.write("### Register for a Program")
+        with st.form("program_form"):
+            name = st.text_input("Full Name", st.session_state.users_db[st.session_state.current_user]["name"])
+            location = st.text_input("Location", st.session_state.users_db[st.session_state.current_user]["location"])
+            specialty = st.text_input("Specialty")
+            qualification = st.text_input("Qualification")
+            selected_program = st.selectbox("Select Program", programs_df["Program"])
+            submitted = st.form_submit_button("Register")
+            if submitted:
+                st.success(f"{name} registered for {selected_program} successfully!")
 
 # -----------------------------
 # Admin dashboard
@@ -157,7 +214,6 @@ def admin_dashboard():
         "Count": [50, 30, 20, 15, 78, 45]
     })
 
-    # ---------------- Dashboard ----------------
     if menu == "Dashboard":
         st.subheader("Filter by State")
         selected_state = st.radio("Select State", ["All"] + states, horizontal=True)
@@ -220,7 +276,6 @@ def admin_dashboard():
         col3.altair_chart(chart3, use_container_width=True)
         col4.altair_chart(chart4, use_container_width=True)
 
-        # Facilities by State chart
         st.subheader("Facilities Registered by State")
         chart_state = alt.Chart(facilities_by_state_filtered).mark_bar(color="#FF4500").encode(
             x=alt.X("Facility", title="Facility"),
@@ -229,3 +284,30 @@ def admin_dashboard():
         ).properties(height=450, width=1300).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
 
         st.altair_chart(chart_state, use_container_width=True)
+
+    elif menu == "Health Programs":
+        st.subheader("Health Programs Supported")
+        programs_df = pd.DataFrame([
+            {"Program": "Orthopaedics"},
+            {"Program": "Intervention Radiology"},
+            {"Program": "Cardiac Care"},
+            {"Program": "Neurology"},
+            {"Program": "Urology"},
+            {"Program": "General Surgery"}
+        ])
+        st.dataframe(programs_df, use_container_width=True)
+
+# -----------------------------
+# Main app flow
+# -----------------------------
+if not st.session_state.logged_in:
+    overview_page()
+    if st.session_state.signup_mode:
+        signup_page()
+    else:
+        login_page()
+else:
+    if st.session_state.user_role == "admin":
+        admin_dashboard()
+    else:
+        user_dashboard()
