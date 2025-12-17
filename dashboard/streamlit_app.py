@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import numpy as np
+import altair as alt
 
 # -----------------------------
 # Page configuration
@@ -126,35 +126,84 @@ def admin_dashboard():
         col4.metric("Trained Health Workers", 75, "+10%")
 
         st.subheader("KPI Charts")
-        # Generate some mock data for charts
+
+        # --- Mock Data ---
         months = ["Jan", "Feb", "Mar", "Apr", "May"]
+        states = ["Lagos", "Abuja", "Kano", "Oyo"]
+
         facility_data = pd.DataFrame({
             "Month": months,
             "Facilities Registered": [10, 20, 35, 60, 128]
-        }).set_index("Month")
+        })
+
         volunteers_data = pd.DataFrame({
             "Month": months,
             "Volunteers Registered": [30, 60, 120, 200, 320]
-        }).set_index("Month")
+        })
+
         matched_data = pd.DataFrame({
             "Month": months,
             "Matched Volunteers": [5, 20, 50, 120, 210]
-        }).set_index("Month")
+        })
+
         trained_data = pd.DataFrame({
             "Month": months,
             "Trained Health Workers": [10, 20, 30, 50, 75]
-        }).set_index("Month")
+        })
 
-        col1, col2 = st.columns(2)
-        with col1:
-            st.line_chart(facility_data)
-        with col2:
-            st.bar_chart(volunteers_data)
-        col1, col2 = st.columns(2)
-        with col1:
-            st.area_chart(matched_data)
-        with col2:
-            st.line_chart(trained_data)
+        facilities_by_state = pd.DataFrame({
+            "State": ["Lagos", "Abuja", "Kano", "Oyo", "Lagos", "Abuja"],
+            "Facility": ["F1", "F2", "F3", "F4", "F5", "F6"],
+            "Count": [50, 30, 20, 15, 78, 45]
+        })
+
+        # --- Charts ---
+        st.subheader("Facilities Registered Monthly")
+        chart1 = alt.Chart(facility_data).mark_line(point=True, color="green").encode(
+            x="Month",
+            y="Facilities Registered",
+            tooltip=["Month", "Facilities Registered"]
+        ).properties(height=300)
+        st.altair_chart(chart1, use_container_width=True)
+
+        st.subheader("Volunteers Registered Monthly")
+        chart2 = alt.Chart(volunteers_data).mark_line(point=True, color="navy").encode(
+            x="Month",
+            y="Volunteers Registered",
+            tooltip=["Month", "Volunteers Registered"]
+        ).properties(height=300)
+        st.altair_chart(chart2, use_container_width=True)
+
+        st.subheader("Matched Volunteers Monthly")
+        chart3 = alt.Chart(matched_data).mark_area(color="#90ee90", opacity=0.6).encode(
+            x="Month",
+            y="Matched Volunteers",
+            tooltip=["Month", "Matched Volunteers"]
+        ).properties(height=300)
+        st.altair_chart(chart3, use_container_width=True)
+
+        st.subheader("Trained Health Workers Monthly")
+        chart4 = alt.Chart(trained_data).mark_bar(color="teal").encode(
+            x="Month",
+            y="Trained Health Workers",
+            tooltip=["Month", "Trained Health Workers"]
+        ).properties(height=300)
+        st.altair_chart(chart4, use_container_width=True)
+
+        # --- Facilities by State ---
+        st.subheader("Facilities Registered by State")
+        selected_state = st.selectbox("Select State", ["All"] + states)
+        if selected_state != "All":
+            filtered_data = facilities_by_state[facilities_by_state["State"] == selected_state]
+        else:
+            filtered_data = facilities_by_state
+
+        chart_state = alt.Chart(filtered_data).mark_bar(color="orange").encode(
+            x="Facility",
+            y="Count",
+            tooltip=["Facility", "State", "Count"]
+        ).properties(height=300)
+        st.altair_chart(chart_state, use_container_width=True)
 
     # ---------------- Health Programs ----------------
     elif menu == "Health Programs":
