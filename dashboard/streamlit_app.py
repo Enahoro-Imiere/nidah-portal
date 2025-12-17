@@ -8,7 +8,7 @@ import plotly.express as px
 st.set_page_config(page_title="NiDAH Portal", layout="wide")
 
 # -----------------------------
-# Dummy users (replace with DB later)
+# Dummy Users
 # -----------------------------
 users_db = [
     {"username": "admin", "password": "admin123", "role": "admin"},
@@ -16,7 +16,7 @@ users_db = [
 ]
 
 # -----------------------------
-# Initialize session state
+# Session state
 # -----------------------------
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
@@ -28,7 +28,7 @@ if "role" not in st.session_state:
     st.session_state["role"] = ""
 
 # -----------------------------
-# Logout function
+# Logout
 # -----------------------------
 def logout():
     for key in ["logged_in", "username", "role"]:
@@ -37,40 +37,28 @@ def logout():
     st.experimental_rerun()
 
 # -----------------------------
-# Landing Page: Overview + Login
+# Landing Page
 # -----------------------------
 def landing_page():
-    col_overview, col_login = st.columns([2, 1])
+    col_overview, col_login = st.columns([2,1])
 
-    # Overview
     with col_overview:
-        st.markdown(
-            """
-            <div style="background-color:#E6F2FF; padding:25px; border-radius:15px;">
-            <h1 style="color:#1E3A8A;">NiDAH Portal</h1>
-            <h3 style="color:#006400;">Nigerians in Diaspora Advanced Health Programme (NiDAH)</h3>
-            <p style="font-size:16px; color:#000000;">
-            Nigeria's health system, despite pockets of excellence, faces significant challenges, including a critical shortage of skilled health workers, infrastructural deficits, and gaps in specialized medical services. A primary driver of this human resource crisis is the continuous emigration of highly trained medical professionals to higher income countries in search of better opportunities—a phenomenon known as "japa." The World Health Organization (WHO) estimates a shortage of nearly 300,000 doctors and nurses in Nigeria, a gap that severely impacts healthcare delivery, particularly in rural and underserved communities.
-            </p>
-            <p style="font-size:16px; color:#000000;">
-            Paradoxically, Nigeria possesses a vast and highly skilled diaspora of health professionals who are global leaders in their respective fields. Thousands of Nigerian doctors, nurses, pharmacists, and allied health professionals are making significant contributions to the health systems of countries like the US, UK, Canada, and Saudi Arabia. This represents an immense reservoir of knowledge, advanced clinical skills, and modern healthcare management expertise currently underutilized for national development.
-            </p>
-            <p style="font-size:16px; color:#000000;">
-            International evidence indicates that diaspora health workers can play a critical role in strengthening health systems and services in low- or middle-income countries of heritage, as well as in their host countries. While permanent return is a complex personal decision, there is a strong desire among many diaspora professionals to contribute to Nigeria's development. A structured, short-term engagement scheme offers a pragmatic "brain circulation" model, providing a bridge for this talent to flow back into the country, even if temporarily. The NiDAH Portal is conceived as a formal, sustainable mechanism to facilitate this two-way exchange, transforming brain drain into a strategic national asset.
-            </p>
-            </div>
-            """, unsafe_allow_html=True
-        )
+        st.markdown("""
+        <div style="background-color:#E6F2FF; padding:30px; border-radius:20px; box-shadow: 3px 3px 15px #888;">
+        <h1 style="color:#1E3A8A;">NiDAH Portal</h1>
+        <h3 style="color:#006400;">Nigerians in Diaspora Advanced Health Programme (NiDAH)</h3>
+        <p style="font-size:16px; line-height:1.6;">Nigeria's health system faces challenges, including shortage of skilled health workers, infrastructural deficits, and gaps in specialized services. Continuous emigration of trained professionals (known as "japa") severely impacts delivery, particularly in underserved communities.</p>
+        <p style="font-size:16px; line-height:1.6;">Nigeria also has a vast, skilled diaspora making contributions globally. This is a reservoir of knowledge, advanced clinical skills, and modern healthcare management expertise.</p>
+        <p style="font-size:16px; line-height:1.6;">Short-term engagement schemes allow diaspora talent to contribute temporarily. The NiDAH Portal facilitates this exchange, transforming brain drain into a national asset.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # Login box
     with col_login:
-        st.markdown(
-            """
-            <div style="background-color:#F0F8FF; padding:25px; border-radius:15px;">
-            <h2 style="color:#1E3A8A;">Sign In</h2>
-            </div>
-            """, unsafe_allow_html=True
-        )
+        st.markdown("""
+        <div style="background-color:#F0F8FF; padding:25px; border-radius:20px; box-shadow: 3px 3px 15px #888;">
+        <h2 style="color:#1E3A8A; text-align:center;">Sign In</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
@@ -83,17 +71,16 @@ def landing_page():
                     st.experimental_rerun()
             st.error("Invalid username or password")
 
-        # Sign Up / Forgot Password links
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Sign Up"):
                 st.session_state["show_signup"] = True
         with col2:
             if st.button("Forgot Password"):
-                st.info("Password reset workflow goes here…")
+                st.info("Password reset workflow will go here…")
 
 # -----------------------------
-# Sign-up form
+# Sign Up Page
 # -----------------------------
 def signup_page():
     st.subheader("Create a new account")
@@ -113,31 +100,31 @@ def signup_page():
 def admin_dashboard():
     st.header("Admin Dashboard")
 
-    # Dummy data
-    states = ["Lagos", "Abuja", "Kano", "Oyo", "Rivers"]
+    # Dummy Data
+    states = ["Lagos","Abuja","Kano","Oyo","Rivers"]
     facilities_all = pd.DataFrame({
-        "Facility": [f"Facility {i}" for i in range(1,21)],
-        "State": [states[i%5] for i in range(20)],
-        "RegisteredMonth": ["Jan","Feb","Mar","Apr","May"]*4
+        "Facility":[f"Facility {i}" for i in range(1,21)],
+        "State":[states[i%5] for i in range(20)],
+        "RegisteredMonth":["Jan","Feb","Mar","Apr","May"]*4
     })
     volunteers_all = pd.DataFrame({
-        "Volunteer": [f"Volunteer {i}" for i in range(1,31)],
-        "State": [states[i%5] for i in range(30)],
-        "RegisteredMonth": ["Jan","Feb","Mar","Apr","May"]*6
+        "Volunteer":[f"Volunteer {i}" for i in range(1,31)],
+        "State":[states[i%5] for i in range(30)],
+        "RegisteredMonth":["Jan","Feb","Mar","Apr","May"]*6
     })
     trained_all = pd.DataFrame({
-        "Worker": [f"Worker {i}" for i in range(1,26)],
-        "TrainedMonth": ["Jan","Feb","Mar","Apr","May"]*5
+        "Worker":[f"Worker {i}" for i in range(1,26)],
+        "TrainedMonth":["Jan","Feb","Mar","Apr","May"]*5
     })
     interventions_all = pd.DataFrame({
-        "State": states,
-        "Intervention_Count": [5, 3, 4, 2, 6],
-        "Latitude": [6.5244, 9.0578, 12.0022, 7.3775, 4.8156],
-        "Longitude": [3.3792, 7.4951, 8.5919, 3.9470, 7.0498]
+        "State":states,
+        "Intervention_Count":[5,3,4,2,6],
+        "Latitude":[6.5244,9.0578,12.0022,7.3775,4.8156],
+        "Longitude":[3.3792,7.4951,8.5919,3.947,7.0498]
     })
 
     # State filter
-    state_filter = st.selectbox("Select State", ["All"] + states)
+    state_filter = st.selectbox("Select State", ["All"]+states)
     if state_filter != "All":
         facilities = facilities_all[facilities_all["State"]==state_filter]
         volunteers = volunteers_all[volunteers_all["State"]==state_filter]
@@ -147,28 +134,28 @@ def admin_dashboard():
         volunteers = volunteers_all
         interventions = interventions_all
 
-    # KPI cards
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Registered Facilities", facilities["Facility"].nunique())
-    col2.metric("Registered Volunteers", volunteers["Volunteer"].nunique())
-    col3.metric("Matched Volunteers", 12)
-    col4.metric("Trained Health Workers", trained_all["Worker"].nunique())
+    # KPI Cards
+    card_col1, card_col2, card_col3, card_col4 = st.columns(4)
+    card_col1.markdown(f"<div style='background-color:#DFF0D8; padding:20px; border-radius:15px; text-align:center;'><h3>Registered Facilities</h3><h2>{facilities['Facility'].nunique()}</h2></div>", unsafe_allow_html=True)
+    card_col2.markdown(f"<div style='background-color:#D9EDF7; padding:20px; border-radius:15px; text-align:center;'><h3>Registered Volunteers</h3><h2>{volunteers['Volunteer'].nunique()}</h2></div>", unsafe_allow_html=True)
+    card_col3.markdown(f"<div style='background-color:#FCF8E3; padding:20px; border-radius:15px; text-align:center;'><h3>Matched Volunteers</h3><h2>12</h2></div>", unsafe_allow_html=True)
+    card_col4.markdown(f"<div style='background-color:#F2DEDE; padding:20px; border-radius:15px; text-align:center;'><h3>Trained Health Workers</h3><h2>{trained_all['Worker'].nunique()}</h2></div>", unsafe_allow_html=True)
 
     # Charts 2x2
     chart_col1, chart_col2 = st.columns(2)
 
     # Facilities by month
     fac_month = facilities.groupby("RegisteredMonth")["Facility"].count().reset_index()
-    fig1 = px.bar(fac_month, x="RegisteredMonth", y="Facility", text="Facility", title="Facilities Registered Monthly")
+    fig1 = px.bar(fac_month, x="RegisteredMonth", y="Facility", text="Facility", title="Facilities Registered Monthly", template="plotly_dark")
     # Volunteers by month
     vol_month = volunteers.groupby("RegisteredMonth")["Volunteer"].count().reset_index()
-    fig2 = px.bar(vol_month, x="RegisteredMonth", y="Volunteer", text="Volunteer", title="Volunteers Registered Monthly")
+    fig2 = px.bar(vol_month, x="RegisteredMonth", y="Volunteer", text="Volunteer", title="Volunteers Registered Monthly", template="plotly_dark")
     # Facilities by state
     fac_state = facilities.groupby("State")["Facility"].count().reset_index()
     fig3 = px.pie(fac_state, names="State", values="Facility", title="Facilities by State")
     # Trained health workers
     trained_month = trained_all.groupby("TrainedMonth")["Worker"].count().reset_index()
-    fig4 = px.line(trained_month, x="TrainedMonth", y="Worker", title="Trained Health Workers Monthly", markers=True)
+    fig4 = px.line(trained_month, x="TrainedMonth", y="Worker", title="Trained Health Workers Monthly", markers=True, template="plotly_dark")
 
     with chart_col1:
         st.plotly_chart(fig1, use_container_width=True)
@@ -191,9 +178,7 @@ def admin_dashboard():
 # -----------------------------
 def user_dashboard():
     st.header("NiDAH Program Registration")
-    st.markdown("""
-    Welcome to the **NiDAH Portal**. Here you can register for the health programs you are interested in.
-    """)
+    st.markdown("Register for the health programs you are interested in:")
     with st.form("program_signup"):
         full_name = st.text_input("Full Name")
         location = st.text_input("Location")
@@ -205,10 +190,10 @@ def user_dashboard():
                                          "Telemedicine Expansion", "Health Facility Upgrades"])
         submitted = st.form_submit_button("Submit")
         if submitted:
-            st.success(f"Thank you {full_name}, you have successfully registered for: {', '.join(program_choice)}")
+            st.success(f"Thank you {full_name}, you have registered for: {', '.join(program_choice)}")
 
 # -----------------------------
-# App flow
+# App Flow
 # -----------------------------
 if not st.session_state["logged_in"]:
     if st.session_state["show_signup"]:
