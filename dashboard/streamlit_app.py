@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import numpy as np
 
 # -----------------------------
 # Page configuration
@@ -110,54 +111,72 @@ def admin_dashboard():
     st.sidebar.title("NiDAH Portal (Admin)")
     menu = st.sidebar.radio(
         "Navigation",
-        ["Dashboard", "Facility Profiling", "Health Programs", "Reports", "Users"]
+        ["Dashboard", "Health Programs", "Reports", "Users"]
     )
 
     st.title("Admin Dashboard")
 
+    # ---------------- Dashboard KPIs ----------------
     if menu == "Dashboard":
-        st.subheader("Overview Metrics")
+        st.subheader("Key Metrics")
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Facilities Assessed", 128)
-        col2.metric("States Covered", 32)
-        col3.metric("Indicators", 54)
-        col4.metric("Pending Reviews", 17)
+        col1.metric("Registered Facilities", 128, "+12%")
+        col2.metric("Registered Volunteers", 320, "+8%")
+        col3.metric("Matched Volunteers", 210, "+15%")
+        col4.metric("Trained Health Workers", 75, "+10%")
 
-        st.subheader("Assessment Progress (Mock Data)")
-        data = pd.DataFrame({
-            "Month": ["Jan", "Feb", "Mar", "Apr", "May"],
-            "Completed Assessments": [12, 28, 45, 78, 128]
-        })
-        st.line_chart(data.set_index("Month"))
+        st.subheader("KPI Charts")
+        # Generate some mock data for charts
+        months = ["Jan", "Feb", "Mar", "Apr", "May"]
+        facility_data = pd.DataFrame({
+            "Month": months,
+            "Facilities Registered": [10, 20, 35, 60, 128]
+        }).set_index("Month")
+        volunteers_data = pd.DataFrame({
+            "Month": months,
+            "Volunteers Registered": [30, 60, 120, 200, 320]
+        }).set_index("Month")
+        matched_data = pd.DataFrame({
+            "Month": months,
+            "Matched Volunteers": [5, 20, 50, 120, 210]
+        }).set_index("Month")
+        trained_data = pd.DataFrame({
+            "Month": months,
+            "Trained Health Workers": [10, 20, 30, 50, 75]
+        }).set_index("Month")
 
-    elif menu == "Facility Profiling":
-        st.subheader("New Facility Profiling")
-        with st.form("facility_form"):
-            facility_name = st.text_input("Facility Name")
-            state = st.selectbox("State", ["Lagos", "Abuja", "Kano", "Oyo"])
-            facility_type = st.selectbox("Facility Type", ["Primary", "Secondary", "Tertiary"])
-            assessor = st.text_input("Assessor Name")
-            assessment_date = st.date_input("Assessment Date", datetime.today())
-            submitted = st.form_submit_button("Submit Profiling")
-            if submitted:
-                st.success("Facility profiling captured (mock submission).")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.line_chart(facility_data)
+        with col2:
+            st.bar_chart(volunteers_data)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.area_chart(matched_data)
+        with col2:
+            st.line_chart(trained_data)
 
+    # ---------------- Health Programs ----------------
     elif menu == "Health Programs":
-        st.subheader("Health Programs Management")
+        st.subheader("NiDAH Supported Health Interventions")
         programs = pd.DataFrame([
-            {"Program": "Maternal & Child Health", "Status": "Active"},
-            {"Program": "Digital Health Training", "Status": "Active"},
-            {"Program": "Telemedicine Expansion", "Status": "Planned"},
-            {"Program": "Health Facility Upgrades", "Status": "Ongoing"},
+            {"Program": "Orthopaedics", "Status": "Active"},
+            {"Program": "Interventional Radiology", "Status": "Active"},
+            {"Program": "Cardiac Care", "Status": "Planned"},
+            {"Program": "Neurology", "Status": "Ongoing"},
+            {"Program": "Urology", "Status": "Active"},
+            {"Program": "General Surgery", "Status": "Planned"},
         ])
         st.dataframe(programs, use_container_width=True)
 
+    # ---------------- Reports ----------------
     elif menu == "Reports":
         st.subheader("Reports")
         st.info("National and state-level reports will be generated here.")
         if st.button("Generate Mock National Report"):
             st.success("National report generated (mock).")
 
+    # ---------------- Users ----------------
     elif menu == "Users":
         st.subheader("Registered Users")
         users_list = []
@@ -180,8 +199,9 @@ def user_dashboard():
     )
 
     st.title("User Dashboard")
+
     if menu == "Overview":
-        st.write("Welcome! Use the sidebar to navigate your tasks.")
+        overview_page()
 
     elif menu == "Facility Profiling":
         st.subheader("New Facility Profiling")
@@ -198,10 +218,12 @@ def user_dashboard():
     elif menu == "Health Programs":
         st.subheader("Available Health Programs")
         programs = pd.DataFrame([
-            {"Program": "Maternal & Child Health", "Status": "Active"},
-            {"Program": "Digital Health Training", "Status": "Active"},
-            {"Program": "Telemedicine Expansion", "Status": "Planned"},
-            {"Program": "Health Facility Upgrades", "Status": "Ongoing"},
+            {"Program": "Orthopaedics", "Status": "Active"},
+            {"Program": "Interventional Radiology", "Status": "Active"},
+            {"Program": "Cardiac Care", "Status": "Planned"},
+            {"Program": "Neurology", "Status": "Ongoing"},
+            {"Program": "Urology", "Status": "Active"},
+            {"Program": "General Surgery", "Status": "Planned"},
         ])
         st.dataframe(programs, use_container_width=True)
 
