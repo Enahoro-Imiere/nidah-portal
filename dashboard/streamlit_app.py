@@ -127,12 +127,79 @@ def landing_page():
 def admin_dashboard():
     st.sidebar.success("Admin")
     st.title("Admin Dashboard")
-    st.info("Admin KPIs and charts will appear here.")
 
-def user_dashboard():
-    st.sidebar.success("User")
-    st.title("User Dashboard")
-    st.info("User program registration will appear here.")
+    # -----------------------------
+    # KPI CARDS
+    # -----------------------------
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+
+    with kpi1:
+        st.markdown("""
+        <div style="background:#e6f2ff; padding:20px; border-radius:15px; text-align:center;">
+            <h3 style="color:#0f2a44;">Facilities</h3>
+            <h1 style="color:#006b3c;">128</h1>
+            <p>Registered</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kpi2:
+        st.markdown("""
+        <div style="background:#f0fff4; padding:20px; border-radius:15px; text-align:center;">
+            <h3 style="color:#0f2a44;">Volunteers</h3>
+            <h1 style="color:#006b3c;">342</h1>
+            <p>Registered</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kpi3:
+        st.markdown("""
+        <div style="background:#fff7ed; padding:20px; border-radius:15px; text-align:center;">
+            <h3 style="color:#0f2a44;">Matched</h3>
+            <h1 style="color:#006b3c;">97</h1>
+            <p>Volunteers</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kpi4:
+        st.markdown("""
+        <div style="background:#eef2ff; padding:20px; border-radius:15px; text-align:center;">
+            <h3 style="color:#0f2a44;">Trained</h3>
+            <h1 style="color:#006b3c;">215</h1>
+            <p>Health Workers</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # -----------------------------
+    # PLACEHOLDER SECTIONS
+    # -----------------------------
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+        <div style="background:#ffffff; padding:25px; border-radius:15px; box-shadow:0px 4px 10px rgba(0,0,0,0.1);">
+            <h4>Facilities Registered Monthly</h4>
+            <p style="color:gray;">📊 Chart placeholder – coming next</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+        <div style="background:#ffffff; padding:25px; border-radius:15px; box-shadow:0px 4px 10px rgba(0,0,0,0.1);">
+            <h4>Volunteers by State</h4>
+            <p style="color:gray;">🗺️ Chart / map placeholder – coming next</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background:#ffffff; padding:25px; border-radius:15px; box-shadow:0px 4px 10px rgba(0,0,0,0.1);">
+        <h4>Training Progress Overview</h4>
+        <p style="color:gray;">📈 Progress tracking placeholder – coming next</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # -----------------------------------
 # APP ROUTER
