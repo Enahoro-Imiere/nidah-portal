@@ -129,22 +129,26 @@ def admin_dashboard():
 
     facility_data = pd.DataFrame({
         "Month": months,
-        "Facilities Registered": [10, 20, 35, 60, 128]
+        "Facilities Registered": [10, 20, 35, 60, 128],
+        "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
     })
 
     volunteers_data = pd.DataFrame({
         "Month": months,
-        "Volunteers Registered": [30, 60, 120, 200, 320]
+        "Volunteers Registered": [30, 60, 120, 200, 320],
+        "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
     })
 
     matched_data = pd.DataFrame({
         "Month": months,
-        "Matched Volunteers": [5, 20, 50, 120, 210]
+        "Matched Volunteers": [5, 20, 50, 120, 210],
+        "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
     })
 
     trained_data = pd.DataFrame({
         "Month": months,
-        "Trained Health Workers": [10, 20, 30, 50, 75]
+        "Trained Health Workers": [10, 20, 30, 50, 75],
+        "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
     })
 
     facilities_by_state = pd.DataFrame({
@@ -155,26 +159,42 @@ def admin_dashboard():
 
     # ---------------- Dashboard ----------------
     if menu == "Dashboard":
-        st.subheader("Key Metrics")
+        st.subheader("Filter by State")
+        selected_state = st.selectbox("Select State", ["All"] + states)
+
+        # Filter datasets based on state selection
+        if selected_state != "All":
+            facility_data_filtered = facility_data[facility_data["State"] == selected_state]
+            volunteers_data_filtered = volunteers_data[volunteers_data["State"] == selected_state]
+            matched_data_filtered = matched_data[matched_data["State"] == selected_state]
+            trained_data_filtered = trained_data[trained_data["State"] == selected_state]
+            facilities_by_state_filtered = facilities_by_state[facilities_by_state["State"] == selected_state]
+        else:
+            facility_data_filtered = facility_data
+            volunteers_data_filtered = volunteers_data
+            matched_data_filtered = matched_data
+            trained_data_filtered = trained_data
+            facilities_by_state_filtered = facilities_by_state
+
+        # KPI cards
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Registered Facilities", 128, "+12%")
-        col2.metric("Registered Volunteers", 320, "+8%")
-        col3.metric("Matched Volunteers", 210, "+15%")
-        col4.metric("Trained Health Workers", 75, "+10%")
+        col1.metric("Registered Facilities", facility_data_filtered["Facilities Registered"].sum())
+        col2.metric("Registered Volunteers", volunteers_data_filtered["Volunteers Registered"].sum())
+        col3.metric("Matched Volunteers", matched_data_filtered["Matched Volunteers"].sum())
+        col4.metric("Trained Health Workers", trained_data_filtered["Trained Health Workers"].sum())
 
         st.subheader("KPI Charts")
-        # ---------------- KPI Charts in 2 columns ----------------
         col1, col2 = st.columns(2)
 
-        chart1 = alt.Chart(facility_data).mark_line(point=True, color="green", size=3).encode(
-            x=alt.X("Month", axis=alt.Axis(title="Month")),
-            y=alt.Y("Facilities Registered", axis=alt.Axis(title="Facilities Registered")),
+        chart1 = alt.Chart(facility_data_filtered).mark_line(point=True, color="green", size=3).encode(
+            x="Month",
+            y="Facilities Registered",
             tooltip=["Month", "Facilities Registered"]
         ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
 
-        chart2 = alt.Chart(volunteers_data).mark_line(point=True, color="navy", size=3).encode(
-            x=alt.X("Month", axis=alt.Axis(title="Month")),
-            y=alt.Y("Volunteers Registered", axis=alt.Axis(title="Volunteers Registered")),
+        chart2 = alt.Chart(volunteers_data_filtered).mark_line(point=True, color="navy", size=3).encode(
+            x="Month",
+            y="Volunteers Registered",
             tooltip=["Month", "Volunteers Registered"]
         ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
 
@@ -183,13 +203,13 @@ def admin_dashboard():
 
         col3, col4 = st.columns(2)
 
-        chart3 = alt.Chart(matched_data).mark_area(color="#90ee90", opacity=0.6).encode(
+        chart3 = alt.Chart(matched_data_filtered).mark_area(color="#90ee90", opacity=0.6).encode(
             x="Month",
             y="Matched Volunteers",
             tooltip=["Month", "Matched Volunteers"]
         ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
 
-        chart4 = alt.Chart(trained_data).mark_bar(color="teal").encode(
+        chart4 = alt.Chart(trained_data_filtered).mark_bar(color="teal").encode(
             x="Month",
             y="Trained Health Workers",
             tooltip=["Month", "Trained Health Workers"]
@@ -198,15 +218,9 @@ def admin_dashboard():
         col3.altair_chart(chart3, use_container_width=True)
         col4.altair_chart(chart4, use_container_width=True)
 
-        # Facilities by State
+        # Facilities by State chart
         st.subheader("Facilities Registered by State")
-        selected_state = st.selectbox("Select State", ["All"] + states)
-        if selected_state != "All":
-            filtered_data = facilities_by_state[facilities_by_state["State"] == selected_state]
-        else:
-            filtered_data = facilities_by_state
-
-        chart_state = alt.Chart(filtered_data).mark_bar(color="orange").encode(
+        chart_state = alt.Chart(facilities_by_state_filtered).mark_bar(color="orange").encode(
             x="Facility",
             y="Count",
             tooltip=["Facility", "State", "Count"]
