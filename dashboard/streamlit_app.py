@@ -220,24 +220,6 @@ def admin_dashboard():
 
     st.plotly_chart(fig, use_container_width=True)
 
-
-    with col2:
-        st.markdown("""
-        <div style="background:#ffffff; padding:25px; border-radius:15px; box-shadow:0px 4px 10px rgba(0,0,0,0.1);">
-            <h4>Volunteers by State</h4>
-            <p style="color:gray;">🗺️ Chart / map placeholder – coming next</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.markdown("""
-    <div style="background:#ffffff; padding:25px; border-radius:15px; box-shadow:0px 4px 10px rgba(0,0,0,0.1);">
-        <h4>Training Progress Overview</h4>
-        <p style="color:gray;">📈 Progress tracking placeholder – coming next</p>
-    </div>
-    """, unsafe_allow_html=True)
-
 # -----------------------------------
 # APP ROUTER
 # -----------------------------------
