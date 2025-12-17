@@ -1,7 +1,4 @@
 import streamlit as st
-import pandas as pd
-import altair as alt
-from datetime import datetime
 
 # -----------------------------
 # Page configuration
@@ -13,74 +10,128 @@ st.set_page_config(
 )
 
 # -----------------------------
-# Session state
+# Session state for login/signup
 # -----------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
-if "user_role" not in st.session_state:
-    st.session_state.user_role = None
-if "current_user" not in st.session_state:
-    st.session_state.current_user = None
 if "signup_mode" not in st.session_state:
     st.session_state.signup_mode = False
-
-# In-memory user database
 if "users_db" not in st.session_state:
-    st.session_state.users_db = {
-        "admin": {"password": "admin123", "role": "admin", "name": "Admin User"},
+    st.session_state.users_db = {"admin": {"password": "admin123", "role": "admin", "name": "Admin User"}}
+
+# -----------------------------
+# Custom CSS for inputs and buttons
+# -----------------------------
+st.markdown("""
+    <style>
+    /* Input box styling */
+    div.stTextInput > label, div.stTextInput > input {
+        font-size:16px;
     }
+    input {
+        border: 2px solid #2E8B57 !important;
+        border-radius:10px !important;
+        padding:10px !important;
+    }
+    /* Button styling */
+    div.stButton > button {
+        background-color:#1E3A8A;
+        color:white;
+        font-size:16px;
+        border-radius:10px;
+        padding:8px 16px;
+        border:none;
+        width:100%;
+        transition: all 0.2s;
+    }
+    div.stButton > button:hover {
+        background-color:#2E8B57;
+        color:white;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # -----------------------------
-# Overview page
+# Landing page: Overview + Sign-in
 # -----------------------------
-def overview_page():
-    col1, col2 = st.columns([2,1])
-    with col1:
-        st.markdown("""
-        <div style="background-color:#F0F8FF; padding:20px; border-radius:10px;">
-            <h2 style="color:#1E3A8A;">Nigerians in Diaspora Advanced Health Programme (NiDAH)</h2>
-            <p style="color:#2E8B57; font-size:16px;">
-            Nigeria's health system faces challenges: shortage of skilled workers, infrastructural deficits, 
-            and gaps in specialized medical services. Emigration of highly trained professionals ("japa") worsens the gap.
-            </p>
-            <p style="color:#2E8B57; font-size:16px;">
-            NiDAH engages diaspora health workers for short-term contributions, strengthening the system. 
-            This portal supports facility profiling, program registration, and national reporting.
-            </p>
+def landing_page():
+    col_overview, col_login = st.columns([2,1])
+
+    # -----------------------------
+    # Overview panel (left) - scrollable
+    # -----------------------------
+    overview_html = """
+    <div style="background-color:#F0F8FF; padding:20px; border-radius:10px; height:650px; overflow-y:auto;">
+        <h2 style="color:#1E3A8A;">Nigerians in Diaspora Advanced Health Programme (NiDAH)</h2>
+        <p style="color:#2E8B57; font-size:16px;">
+        Nigeria's health system, despite pockets of excellence, faces significant challenges, 
+        including a critical shortage of skilled health workers, infrastructural deficits, 
+        and gaps in specialized medical services. A primary driver of this human resource crisis 
+        is the continuous emigration of highly trained medical professionals to higher income 
+        countries in search of better opportunities ("japa"). The World Health Organization (WHO) 
+        estimates a shortage of nearly 300,000 doctors and nurses in Nigeria, a gap that severely 
+        impacts healthcare delivery, particularly in rural and underserved communities.
+        </p>
+        <p style="color:#2E8B57; font-size:16px;">
+        Paradoxically, Nigeria possesses a vast and highly skilled diaspora of health professionals 
+        who are global leaders in their respective fields. Thousands of Nigerian doctors, nurses, 
+        pharmacists, and allied health professionals are making significant contributions to the 
+        health systems of countries like the United States, the United Kingdom, Canada, and Saudi Arabia. 
+        This community represents an immense reservoir of knowledge, advanced clinical skills, 
+        and modern healthcare management expertise that is currently underutilized for national development.
+        </p>
+        <p style="color:#2E8B57; font-size:16px;">
+        International evidence indicates that diaspora health workers can play a critical role 
+        in strengthening health systems and services in low- or middle-income countries of heritage. 
+        While permanent return is a complex personal decision, there is a strong, expressed desire 
+        among many diaspora professionals to contribute to Nigeria's development. A structured, 
+        short-term engagement scheme offers a pragmatic "brain circulation" model, providing a bridge 
+        for this talent to flow back into the country, even if temporarily. The NiDAH Portal is conceived 
+        as a formal, sustainable mechanism to facilitate this two-way exchange, transforming brain drain 
+        into a strategic national asset.
+        </p>
+    </div>
+    """
+    with col_overview:
+        st.markdown(overview_html, unsafe_allow_html=True)
+
+    # -----------------------------
+    # Sign-in panel (right) - styled
+    # -----------------------------
+    with col_login:
+        card_html = """
+        <div style="background-color:#E6F2FF; padding:30px; border-radius:15px; border: 2px solid #1E3A8A;
+                    height:650px; display:flex; flex-direction:column; justify-content:center; box-shadow: 5px 5px 15px rgba(0,0,0,0.1);">
+            <h2 style="color:#1E3A8A; text-align:center;">Sign In</h2>
         </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.image("https://upload.wikimedia.org/wikipedia/commons/6/6b/Nigeria_Flag.png", width=200)
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
+        st.markdown("<div style='padding:10px'></div>", unsafe_allow_html=True)
 
-# -----------------------------
-# Login page
-# -----------------------------
-def login_page():
-    st.markdown("<h1 style='color:#1E3A8A;'>NiDAH Portal</h1>", unsafe_allow_html=True)
-    st.write("### Sign In")
-    
-    username_input = st.text_input("Username")
-    password_input = st.text_input("Password", type="password")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Login"):
-            if username_input in st.session_state.users_db and \
-               st.session_state.users_db[username_input]["password"] == password_input:
+        username = st.text_input("", placeholder="Username")
+        password = st.text_input("", type="password", placeholder="Password")
+
+        login_button = st.button("Login")
+        col1, col2 = st.columns(2)
+        with col1:
+            signup_button = st.button("Sign Up")
+        with col2:
+            forgot_button = st.button("Forgot Password")
+
+        # Login logic
+        if login_button:
+            if username in st.session_state.users_db and st.session_state.users_db[username]["password"] == password:
                 st.session_state.logged_in = True
-                st.session_state.user_role = st.session_state.users_db[username_input]["role"]
-                st.session_state.current_user = username_input
-                st.success(f"Logged in as {st.session_state.user_role.title()}")
+                st.success(f"Welcome {st.session_state.users_db[username]['name']}!")
             else:
                 st.error("Invalid username or password")
-    with col2:
-        if st.button("Sign Up"):
+        if signup_button:
             st.session_state.signup_mode = True
-        if st.button("Forgot Password"):
-            st.info("Password reset feature not implemented in this dummy portal.")
+        if forgot_button:
+            st.info("Password reset not available in dummy portal.")
 
 # -----------------------------
-# Sign up page
+# Sign-up page
 # -----------------------------
 def signup_page():
     st.write("### Create a New Account")
@@ -104,117 +155,12 @@ def signup_page():
                 st.session_state.signup_mode = False
 
 # -----------------------------
-# User dashboard
-# -----------------------------
-def user_dashboard():
-    st.sidebar.title("NiDAH Portal (User)")
-    if st.sidebar.button("Logout"):
-        st.session_state.logged_in = False
-        st.session_state.user_role = None
-        st.session_state.current_user = None
-        st.experimental_rerun()
-    
-    menu = st.sidebar.radio("Navigation", ["Dashboard", "Health Programs"])
-
-    # Mock programs
-    programs = [
-        {"Program": "Maternal & Child Health", "Status": "Active"},
-        {"Program": "Digital Health Training", "Status": "Active"},
-        {"Program": "Telemedicine Expansion", "Status": "Planned"},
-        {"Program": "Health Facility Upgrades", "Status": "Ongoing"}
-    ]
-    programs_df = pd.DataFrame(programs)
-
-    if menu == "Dashboard":
-        st.subheader(f"Welcome {st.session_state.current_user}!")
-        st.write("Use Health Programs menu to register.")
-
-    if menu == "Health Programs":
-        st.subheader("Available Health Programs")
-        st.dataframe(programs_df, use_container_width=True)
-
-        st.write("### Register for a Program")
-        with st.form("program_form"):
-            name = st.text_input("Full Name", st.session_state.users_db[st.session_state.current_user]["name"])
-            location = st.text_input("Location", st.session_state.users_db[st.session_state.current_user]["location"])
-            specialty = st.text_input("Specialty")
-            qualification = st.text_input("Qualification")
-            selected_program = st.selectbox("Select Program", programs_df["Program"])
-            submitted = st.form_submit_button("Register")
-            if submitted:
-                st.success(f"{name} registered for {selected_program} successfully!")
-
-# -----------------------------
-# Admin dashboard
-# -----------------------------
-def admin_dashboard():
-    st.sidebar.title("NiDAH Portal (Admin)")
-    if st.sidebar.button("Logout"):
-        st.session_state.logged_in = False
-        st.session_state.user_role = None
-        st.session_state.current_user = None
-        st.experimental_rerun()
-    
-    menu = st.sidebar.radio("Navigation", ["Dashboard", "Health Programs", "Reports", "Users"])
-    
-    # Mock data for charts and KPIs
-    months = ["Jan", "Feb", "Mar", "Apr", "May"]
-    states = ["Lagos", "Abuja", "Kano", "Oyo"]
-
-    facility_data = pd.DataFrame({
-        "Month": months,
-        "Facilities Registered": [10, 20, 35, 60, 128],
-        "State": ["Lagos","Lagos","Abuja","Kano","Oyo"]
-    })
-
-    # KPI cards
-    st.subheader("KPI Metrics")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Registered Facilities", facility_data["Facilities Registered"].sum())
-    col2.metric("Registered Volunteers", 300)
-    col3.metric("Matched Volunteers", 150)
-    col4.metric("Trained Health Workers", 75)
-
-    st.subheader("KPI Charts")
-    col1, col2 = st.columns(2)
-
-    chart1 = alt.Chart(facility_data).mark_bar(color="#2E8B57").encode(
-        x="Month",
-        y="Facilities Registered",
-        tooltip=["Month","Facilities Registered"]
-    ).properties(width=650,height=450).configure_view(strokeWidth=4,stroke="black",fill="white")
-
-    chart2 = alt.Chart(facility_data).mark_line(color="#1E3A8A",point=True).encode(
-        x="Month",
-        y="Facilities Registered",
-        tooltip=["Month","Facilities Registered"]
-    ).properties(width=650,height=450).configure_view(strokeWidth=4,stroke="black",fill="white")
-
-    col1.altair_chart(chart1,use_container_width=True)
-    col2.altair_chart(chart2,use_container_width=True)
-
-    st.subheader("Health Programs")
-    programs_df = pd.DataFrame([
-        {"Program": "Orthopaedics"},
-        {"Program": "Intervention Radiology"},
-        {"Program": "Cardiac Care"},
-        {"Program": "Neurology"},
-        {"Program": "Urology"},
-        {"Program": "General Surgery"}
-    ])
-    st.dataframe(programs_df,use_container_width=True)
-
-# -----------------------------
 # Main flow
 # -----------------------------
 if not st.session_state.logged_in:
-    overview_page()
     if st.session_state.signup_mode:
         signup_page()
     else:
-        login_page()
+        landing_page()
 else:
-    if st.session_state.user_role == "admin":
-        admin_dashboard()
-    else:
-        user_dashboard()
+    st.write(f"Logged in as {st.session_state.users_db[st.session_state.current_user]['name']}!")
