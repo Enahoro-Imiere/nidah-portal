@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 # -----------------------------
-# Initialize session state
+# Session state initialization
 # -----------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -109,6 +109,13 @@ def signup_page():
 # -----------------------------
 def admin_dashboard():
     st.sidebar.title("NiDAH Portal (Admin)")
+    
+    if st.sidebar.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.user_role = None
+        st.session_state.current_user = None
+        st.experimental_rerun()
+
     menu = st.sidebar.radio(
         "Navigation",
         ["Dashboard", "Health Programs", "Reports", "Users"]
@@ -116,7 +123,37 @@ def admin_dashboard():
 
     st.title("Admin Dashboard")
 
-    # ---------------- Dashboard KPIs ----------------
+    # --- Mock Data ---
+    months = ["Jan", "Feb", "Mar", "Apr", "May"]
+    states = ["Lagos", "Abuja", "Kano", "Oyo"]
+
+    facility_data = pd.DataFrame({
+        "Month": months,
+        "Facilities Registered": [10, 20, 35, 60, 128]
+    })
+
+    volunteers_data = pd.DataFrame({
+        "Month": months,
+        "Volunteers Registered": [30, 60, 120, 200, 320]
+    })
+
+    matched_data = pd.DataFrame({
+        "Month": months,
+        "Matched Volunteers": [5, 20, 50, 120, 210]
+    })
+
+    trained_data = pd.DataFrame({
+        "Month": months,
+        "Trained Health Workers": [10, 20, 30, 50, 75]
+    })
+
+    facilities_by_state = pd.DataFrame({
+        "State": ["Lagos", "Abuja", "Kano", "Oyo", "Lagos", "Abuja"],
+        "Facility": ["F1", "F2", "F3", "F4", "F5", "F6"],
+        "Count": [50, 30, 20, 15, 78, 45]
+    })
+
+    # ---------------- Dashboard ----------------
     if menu == "Dashboard":
         st.subheader("Key Metrics")
         col1, col2, col3, col4 = st.columns(4)
@@ -126,71 +163,42 @@ def admin_dashboard():
         col4.metric("Trained Health Workers", 75, "+10%")
 
         st.subheader("KPI Charts")
+        # ---------------- KPI Charts in 2 columns ----------------
+        col1, col2 = st.columns(2)
 
-        # --- Mock Data ---
-        months = ["Jan", "Feb", "Mar", "Apr", "May"]
-        states = ["Lagos", "Abuja", "Kano", "Oyo"]
-
-        facility_data = pd.DataFrame({
-            "Month": months,
-            "Facilities Registered": [10, 20, 35, 60, 128]
-        })
-
-        volunteers_data = pd.DataFrame({
-            "Month": months,
-            "Volunteers Registered": [30, 60, 120, 200, 320]
-        })
-
-        matched_data = pd.DataFrame({
-            "Month": months,
-            "Matched Volunteers": [5, 20, 50, 120, 210]
-        })
-
-        trained_data = pd.DataFrame({
-            "Month": months,
-            "Trained Health Workers": [10, 20, 30, 50, 75]
-        })
-
-        facilities_by_state = pd.DataFrame({
-            "State": ["Lagos", "Abuja", "Kano", "Oyo", "Lagos", "Abuja"],
-            "Facility": ["F1", "F2", "F3", "F4", "F5", "F6"],
-            "Count": [50, 30, 20, 15, 78, 45]
-        })
-
-        # --- Charts ---
-        st.subheader("Facilities Registered Monthly")
-        chart1 = alt.Chart(facility_data).mark_line(point=True, color="green").encode(
-            x="Month",
-            y="Facilities Registered",
+        chart1 = alt.Chart(facility_data).mark_line(point=True, color="green", size=3).encode(
+            x=alt.X("Month", axis=alt.Axis(title="Month")),
+            y=alt.Y("Facilities Registered", axis=alt.Axis(title="Facilities Registered")),
             tooltip=["Month", "Facilities Registered"]
-        ).properties(height=300)
-        st.altair_chart(chart1, use_container_width=True)
+        ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
 
-        st.subheader("Volunteers Registered Monthly")
-        chart2 = alt.Chart(volunteers_data).mark_line(point=True, color="navy").encode(
-            x="Month",
-            y="Volunteers Registered",
+        chart2 = alt.Chart(volunteers_data).mark_line(point=True, color="navy", size=3).encode(
+            x=alt.X("Month", axis=alt.Axis(title="Month")),
+            y=alt.Y("Volunteers Registered", axis=alt.Axis(title="Volunteers Registered")),
             tooltip=["Month", "Volunteers Registered"]
-        ).properties(height=300)
-        st.altair_chart(chart2, use_container_width=True)
+        ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
 
-        st.subheader("Matched Volunteers Monthly")
+        col1.altair_chart(chart1, use_container_width=True)
+        col2.altair_chart(chart2, use_container_width=True)
+
+        col3, col4 = st.columns(2)
+
         chart3 = alt.Chart(matched_data).mark_area(color="#90ee90", opacity=0.6).encode(
             x="Month",
             y="Matched Volunteers",
             tooltip=["Month", "Matched Volunteers"]
-        ).properties(height=300)
-        st.altair_chart(chart3, use_container_width=True)
+        ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
 
-        st.subheader("Trained Health Workers Monthly")
         chart4 = alt.Chart(trained_data).mark_bar(color="teal").encode(
             x="Month",
             y="Trained Health Workers",
             tooltip=["Month", "Trained Health Workers"]
-        ).properties(height=300)
-        st.altair_chart(chart4, use_container_width=True)
+        ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
 
-        # --- Facilities by State ---
+        col3.altair_chart(chart3, use_container_width=True)
+        col4.altair_chart(chart4, use_container_width=True)
+
+        # Facilities by State
         st.subheader("Facilities Registered by State")
         selected_state = st.selectbox("Select State", ["All"] + states)
         if selected_state != "All":
@@ -202,7 +210,8 @@ def admin_dashboard():
             x="Facility",
             y="Count",
             tooltip=["Facility", "State", "Count"]
-        ).properties(height=300)
+        ).properties(height=350).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
+
         st.altair_chart(chart_state, use_container_width=True)
 
     # ---------------- Health Programs ----------------
@@ -242,6 +251,12 @@ def admin_dashboard():
 # -----------------------------
 def user_dashboard():
     st.sidebar.title("NiDAH Portal (User)")
+    if st.sidebar.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.user_role = None
+        st.session_state.current_user = None
+        st.experimental_rerun()
+
     menu = st.sidebar.radio(
         "Navigation",
         ["Overview", "Facility Profiling", "Health Programs", "Profile"]
@@ -323,14 +338,6 @@ def main():
             admin_dashboard()
         else:
             user_dashboard()
-
-    # Logout button
-    if st.session_state.logged_in:
-        if st.button("Logout"):
-            st.session_state.logged_in = False
-            st.session_state.user_role = None
-            st.session_state.current_user = None
-            st.experimental_rerun()
 
 if __name__ == "__main__":
     main()
