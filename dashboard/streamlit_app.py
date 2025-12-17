@@ -160,7 +160,7 @@ def admin_dashboard():
     # ---------------- Dashboard ----------------
     if menu == "Dashboard":
         st.subheader("Filter by State")
-        selected_state = st.selectbox("Select State", ["All"] + states)
+        selected_state = st.radio("Select State", ["All"] + states, horizontal=True)
 
         # Filter datasets based on state selection
         if selected_state != "All":
@@ -186,172 +186,46 @@ def admin_dashboard():
         st.subheader("KPI Charts")
         col1, col2 = st.columns(2)
 
-        chart1 = alt.Chart(facility_data_filtered).mark_line(point=True, color="green", size=3).encode(
-            x="Month",
-            y="Facilities Registered",
-            tooltip=["Month", "Facilities Registered"]
-        ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
+        highlight = alt.selection_single(on="mouseover", fields=["Month"], nearest=True, empty="none")
 
-        chart2 = alt.Chart(volunteers_data_filtered).mark_line(point=True, color="navy", size=3).encode(
-            x="Month",
-            y="Volunteers Registered",
+        chart1 = alt.Chart(facility_data_filtered).mark_line(point=True, color="#2E8B57", size=5).encode(
+            x=alt.X("Month", title="Month"),
+            y=alt.Y("Facilities Registered", title="Facilities Registered"),
+            tooltip=["Month", "Facilities Registered"]
+        ).add_selection(highlight).interactive().properties(height=450, width=650).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
+
+        chart2 = alt.Chart(volunteers_data_filtered).mark_line(point=True, color="#1E3A8A", size=5).encode(
+            x=alt.X("Month", title="Month"),
+            y=alt.Y("Volunteers Registered", title="Volunteers Registered"),
             tooltip=["Month", "Volunteers Registered"]
-        ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
+        ).add_selection(highlight).interactive().properties(height=450, width=650).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
 
         col1.altair_chart(chart1, use_container_width=True)
         col2.altair_chart(chart2, use_container_width=True)
 
         col3, col4 = st.columns(2)
 
-        chart3 = alt.Chart(matched_data_filtered).mark_area(color="#90ee90", opacity=0.6).encode(
-            x="Month",
-            y="Matched Volunteers",
+        chart3 = alt.Chart(matched_data_filtered).mark_area(color="#FF8C00", opacity=0.6).encode(
+            x=alt.X("Month", title="Month"),
+            y=alt.Y("Matched Volunteers", title="Matched Volunteers"),
             tooltip=["Month", "Matched Volunteers"]
-        ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
+        ).add_selection(highlight).interactive().properties(height=450, width=650).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
 
-        chart4 = alt.Chart(trained_data_filtered).mark_bar(color="teal").encode(
-            x="Month",
-            y="Trained Health Workers",
+        chart4 = alt.Chart(trained_data_filtered).mark_bar(color="#20B2AA").encode(
+            x=alt.X("Month", title="Month"),
+            y=alt.Y("Trained Health Workers", title="Trained Health Workers"),
             tooltip=["Month", "Trained Health Workers"]
-        ).properties(height=300, width=400).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
+        ).add_selection(highlight).interactive().properties(height=450, width=650).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
 
         col3.altair_chart(chart3, use_container_width=True)
         col4.altair_chart(chart4, use_container_width=True)
 
         # Facilities by State chart
         st.subheader("Facilities Registered by State")
-        chart_state = alt.Chart(facilities_by_state_filtered).mark_bar(color="orange").encode(
-            x="Facility",
-            y="Count",
+        chart_state = alt.Chart(facilities_by_state_filtered).mark_bar(color="#FF4500").encode(
+            x=alt.X("Facility", title="Facility"),
+            y=alt.Y("Count", title="Number of Facilities"),
             tooltip=["Facility", "State", "Count"]
-        ).properties(height=350).configure_axis(grid=False).configure_view(strokeWidth=3, stroke="black")
+        ).properties(height=450, width=1300).configure_axis(grid=False).configure_view(strokeWidth=4, stroke="black", fill="white")
 
         st.altair_chart(chart_state, use_container_width=True)
-
-    # ---------------- Health Programs ----------------
-    elif menu == "Health Programs":
-        st.subheader("NiDAH Supported Health Interventions")
-        programs = pd.DataFrame([
-            {"Program": "Orthopaedics", "Status": "Active"},
-            {"Program": "Interventional Radiology", "Status": "Active"},
-            {"Program": "Cardiac Care", "Status": "Planned"},
-            {"Program": "Neurology", "Status": "Ongoing"},
-            {"Program": "Urology", "Status": "Active"},
-            {"Program": "General Surgery", "Status": "Planned"},
-        ])
-        st.dataframe(programs, use_container_width=True)
-
-    # ---------------- Reports ----------------
-    elif menu == "Reports":
-        st.subheader("Reports")
-        st.info("National and state-level reports will be generated here.")
-        if st.button("Generate Mock National Report"):
-            st.success("National report generated (mock).")
-
-    # ---------------- Users ----------------
-    elif menu == "Users":
-        st.subheader("Registered Users")
-        users_list = []
-        for username, info in st.session_state.users_db.items():
-            users_list.append({
-                "Username": username,
-                "Name": info["name"],
-                "Role": info["role"].title()
-            })
-        st.table(pd.DataFrame(users_list))
-
-# -----------------------------
-# User dashboard
-# -----------------------------
-def user_dashboard():
-    st.sidebar.title("NiDAH Portal (User)")
-    if st.sidebar.button("Logout"):
-        st.session_state.logged_in = False
-        st.session_state.user_role = None
-        st.session_state.current_user = None
-        st.experimental_rerun()
-
-    menu = st.sidebar.radio(
-        "Navigation",
-        ["Overview", "Facility Profiling", "Health Programs", "Profile"]
-    )
-
-    st.title("User Dashboard")
-
-    if menu == "Overview":
-        overview_page()
-
-    elif menu == "Facility Profiling":
-        st.subheader("New Facility Profiling")
-        with st.form("facility_form_user"):
-            facility_name = st.text_input("Facility Name")
-            state = st.selectbox("State", ["Lagos", "Abuja", "Kano", "Oyo"])
-            facility_type = st.selectbox("Facility Type", ["Primary", "Secondary", "Tertiary"])
-            assessor = st.text_input("Assessor Name")
-            assessment_date = st.date_input("Assessment Date", datetime.today())
-            submitted = st.form_submit_button("Submit Profiling")
-            if submitted:
-                st.success("Facility profiling captured (mock submission).")
-
-    elif menu == "Health Programs":
-        st.subheader("Available Health Programs")
-        programs = pd.DataFrame([
-            {"Program": "Orthopaedics", "Status": "Active"},
-            {"Program": "Interventional Radiology", "Status": "Active"},
-            {"Program": "Cardiac Care", "Status": "Planned"},
-            {"Program": "Neurology", "Status": "Ongoing"},
-            {"Program": "Urology", "Status": "Active"},
-            {"Program": "General Surgery", "Status": "Planned"},
-        ])
-        st.dataframe(programs, use_container_width=True)
-
-        st.write("### Register for a Program")
-        with st.form("program_registration"):
-            full_name = st.text_input("Full Name")
-            location = st.text_input("Location")
-            specialty = st.text_input("Specialty")
-            qualification = st.text_input("Qualification")
-            program_choice = st.selectbox("Program Choice", programs["Program"])
-            submitted = st.form_submit_button("Register")
-            if submitted:
-                st.success(f"Registered for {program_choice} (mock submission).")
-
-    elif menu == "Profile":
-        user_info = st.session_state.users_db.get(st.session_state.current_user, {})
-        st.subheader("My Profile")
-        st.write(f"Name: {user_info.get('name', '')}")
-        st.write(f"Username: {st.session_state.current_user}")
-        st.write(f"Role: {user_info.get('role', '')}")
-        st.write(f"Location: {user_info.get('location', '')}")
-
-# -----------------------------
-# Main App
-# -----------------------------
-def main():
-    st.markdown(
-        """
-        <style>
-        .css-1d391kg {background-color: #d9f0d9;}  /* sidebar background */
-        .stApp {background-color: #f0f8ff;}         /* page background */
-        h1 {color: navy;}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if st.session_state.signup_mode:
-        signup_page()
-    elif not st.session_state.logged_in:
-        col1, col2 = st.columns([2,3])
-        with col1:
-            overview_page()
-        with col2:
-            login_page()
-    else:
-        if st.session_state.user_role == "admin":
-            admin_dashboard()
-        else:
-            user_dashboard()
-
-if __name__ == "__main__":
-    main()
