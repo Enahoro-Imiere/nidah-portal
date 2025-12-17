@@ -1,4 +1,6 @@
 import streamlit as st
+import plotly.express as px
+import pandas as pd
 
 # -----------------------------------
 # PAGE CONFIG (Cloud-safe)
@@ -177,12 +179,47 @@ def admin_dashboard():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("""
-        <div style="background:#ffffff; padding:25px; border-radius:15px; box-shadow:0px 4px 10px rgba(0,0,0,0.1);">
-            <h4>Facilities Registered Monthly</h4>
-            <p style="color:gray;">📊 Chart placeholder – coming next</p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(
+        "<h4 style='margin-bottom:10px;'>Facilities Registered Monthly</h4>",
+        unsafe_allow_html=True
+    )
+
+    # Dummy monthly data
+    df_facilities = pd.DataFrame({
+        "Month": [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ],
+        "Facilities": [5, 8, 12, 15, 18, 20, 22, 25, 28, 30, 32, 35]
+    })
+
+    fig = px.bar(
+        df_facilities,
+        x="Month",
+        y="Facilities",
+        text="Facilities",
+        color_discrete_sequence=["#0f766e"]
+    )
+
+    fig.update_layout(
+        height=420,
+        plot_bgcolor="#f9fafb",
+        paper_bgcolor="#ffffff",
+        margin=dict(l=20, r=20, t=30, b=20),
+        font=dict(size=14),
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False),
+        showlegend=False
+    )
+
+    fig.update_traces(
+        textposition="outside",
+        marker_line_width=2,
+        marker_line_color="#0f2a44"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
 
     with col2:
         st.markdown("""
