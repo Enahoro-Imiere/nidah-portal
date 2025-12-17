@@ -18,68 +18,94 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_role" not in st.session_state:
     st.session_state.user_role = None
-if "email" not in st.session_state:
-    st.session_state.email = None
+if "current_user" not in st.session_state:
+    st.session_state.current_user = None
+if "signup_mode" not in st.session_state:
+    st.session_state.signup_mode = False
+if "users_db" not in st.session_state:
+    st.session_state.users_db = {
+        "admin": {"password": "admin123", "role": "admin", "name": "Admin User"},
+        "user": {"password": "user123", "role": "user", "name": "Field Assessor"}
+    }
 
 # -----------------------------
-# Sample users (mock)
-# -----------------------------
-users_db = {
-    "admin@example.com": {"password": "admin123", "role": "admin", "name": "Admin User"},
-    "user@example.com": {"password": "user123", "role": "user", "name": "Field Assessor"}
-}
-
-# -----------------------------
-# Helper functions
+# Overview page
 # -----------------------------
 def overview_page():
     st.markdown(
         """
         ## Nigerians in Diaspora Advanced Health Programme (NiDAH)
-        Nigeria's health system faces critical challenges, including shortage of skilled health workers, infrastructural deficits, and gaps in specialized medical services.
         
-        Thousands of Nigerian health professionals in the diaspora can play a key role in strengthening health systems in Nigeria through structured short-term engagements.
-        
-        The NiDAH Portal facilitates **facility profiling**, **program registration**, and **national reporting** to bridge this gap.
+        Nigeria's health system faces serious challenges: shortage of skilled health workers, 
+        infrastructural deficits, and gaps in specialized medical services. A key factor is the 
+        emigration of highly trained professionals seeking better opportunities abroad ("japa"). 
+
+        Meanwhile, Nigeria has a vast, highly skilled diaspora of doctors, nurses, pharmacists, 
+        and allied health professionals contributing globally. This talent is underutilized for 
+        national development.
+
+        The NiDAH initiative creates a structured mechanism to engage diaspora health workers, 
+        offering short-term engagements to strengthen Nigeria's health system. This portal 
+        facilitates **facility profiling**, **program registration**, and **national reporting** 
+        to bridge the gap between brain drain and national healthcare development.
         """,
         unsafe_allow_html=True
     )
 
+# -----------------------------
+# Login page
+# -----------------------------
 def login_page():
     st.markdown("<h1 style='color:navy'>NiDAH Portal</h1>", unsafe_allow_html=True)
     st.write("### Sign In")
+
+    username_input = st.text_input("Username")
+    password_input = st.text_input("Password", type="password")
     
-    col1, col2 = st.columns([2,1])
+    col1, col2 = st.columns(2)
     with col1:
-        email_input = st.text_input("Email")
-        password_input = st.text_input("Password", type="password")
         if st.button("Login"):
-            if email_input in users_db and users_db[email_input]["password"] == password_input:
+            if username_input in st.session_state.users_db and \
+               st.session_state.users_db[username_input]["password"] == password_input:
                 st.session_state.logged_in = True
-                st.session_state.user_role = users_db[email_input]["role"]
-                st.session_state.email = email_input
-                st.success(f"Logged in as {users_db[email_input]['role'].title()}")
+                st.session_state.user_role = st.session_state.users_db[username_input]["role"]
+                st.session_state.current_user = username_input
+                st.success(f"Logged in as {st.session_state.user_role.title()}")
             else:
-                st.error("Invalid credentials")
+                st.error("Invalid username or password")
     with col2:
         if st.button("Sign Up"):
-            st.session_state.signup = True
+            st.session_state.signup_mode = True
         if st.button("Forgot Password"):
-            st.info("Password reset feature not implemented in mock portal.")
+            st.info("Password reset feature not implemented in this mock portal.")
 
+# -----------------------------
+# Sign up page
+# -----------------------------
 def signup_page():
     st.write("### Create a New Account")
     with st.form("signup_form"):
+        username = st.text_input("Username")
         full_name = st.text_input("Full Name")
         location = st.text_input("Location")
-        email = st.text_input("Email")
         password = st.text_input("Password", type="password")
         submitted = st.form_submit_button("Register")
         if submitted:
-            users_db[email] = {"password": password, "role": "user", "name": full_name}
-            st.success("Account created successfully! Please login.")
-            st.session_state.signup = False
+            if username in st.session_state.users_db:
+                st.error("Username already exists")
+            else:
+                st.session_state.users_db[username] = {
+                    "password": password,
+                    "role": "user",
+                    "name": full_name,
+                    "location": location
+                }
+                st.success("Account created successfully! Please login.")
+                st.session_state.signup_mode = False
 
+# -----------------------------
+# Admin dashboard
+# -----------------------------
 def admin_dashboard():
     st.sidebar.title("NiDAH Portal (Admin)")
     menu = st.sidebar.radio(
@@ -135,10 +161,17 @@ def admin_dashboard():
     elif menu == "Users":
         st.subheader("Registered Users")
         users_list = []
-        for email, info in users_db.items():
-            users_list.append({"Name": info["name"], "Role": info["role"].title(), "Email": email})
+        for username, info in st.session_state.users_db.items():
+            users_list.append({
+                "Username": username,
+                "Name": info["name"],
+                "Role": info["role"].title()
+            })
         st.table(pd.DataFrame(users_list))
 
+# -----------------------------
+# User dashboard
+# -----------------------------
 def user_dashboard():
     st.sidebar.title("NiDAH Portal (User)")
     menu = st.sidebar.radio(
@@ -148,7 +181,7 @@ def user_dashboard():
 
     st.title("User Dashboard")
     if menu == "Overview":
-        st.write("Welcome! Please navigate using the sidebar to access your tasks.")
+        st.write("Welcome! Use the sidebar to navigate your tasks.")
 
     elif menu == "Facility Profiling":
         st.subheader("New Facility Profiling")
@@ -174,7 +207,7 @@ def user_dashboard():
 
         st.write("### Register for a Program")
         with st.form("program_registration"):
-            name = st.text_input("Full Name")
+            full_name = st.text_input("Full Name")
             location = st.text_input("Location")
             specialty = st.text_input("Specialty")
             qualification = st.text_input("Qualification")
@@ -184,27 +217,29 @@ def user_dashboard():
                 st.success(f"Registered for {program_choice} (mock submission).")
 
     elif menu == "Profile":
-        user_info = users_db.get(st.session_state.email, {})
+        user_info = st.session_state.users_db.get(st.session_state.current_user, {})
         st.subheader("My Profile")
         st.write(f"Name: {user_info.get('name', '')}")
-        st.write(f"Email: {st.session_state.email}")
+        st.write(f"Username: {st.session_state.current_user}")
         st.write(f"Role: {user_info.get('role', '')}")
+        st.write(f"Location: {user_info.get('location', '')}")
 
 # -----------------------------
-# Main App Logic
+# Main App
 # -----------------------------
 def main():
     st.markdown(
         """
         <style>
-        .css-1d391kg {background-color: #f5f5f5;}  /* sidebar background */
-        .stApp {background-color: #e6f2ff;}         /* page background */
+        .css-1d391kg {background-color: #d9f0d9;}  /* sidebar background */
+        .stApp {background-color: #f0f8ff;}         /* page background */
+        h1 {color: navy;}
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    if "signup" in st.session_state and st.session_state.signup:
+    if st.session_state.signup_mode:
         signup_page()
     elif not st.session_state.logged_in:
         col1, col2 = st.columns([2,3])
@@ -218,12 +253,12 @@ def main():
         else:
             user_dashboard()
 
-    # Logout button at the bottom
+    # Logout button
     if st.session_state.logged_in:
         if st.button("Logout"):
             st.session_state.logged_in = False
             st.session_state.user_role = None
-            st.session_state.email = None
+            st.session_state.current_user = None
             st.experimental_rerun()
 
 if __name__ == "__main__":
