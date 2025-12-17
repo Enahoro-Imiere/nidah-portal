@@ -2,262 +2,229 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# ---------------- PAGE CONFIG ----------------
-st.set_page_config(page_title="NiDAH Portal", layout="wide")
+# -----------------------------
+# Page configuration
+# -----------------------------
+st.set_page_config(
+    page_title="NiDAH Portal",
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
 
-# ---------------- SESSION STATE ----------------
-if "users" not in st.session_state:
-    st.session_state.users = {
-        "admin": {
-            "full_name": "Administrator",
-            "location": "Head Office",
-            "email": "admin@example.com",
-            "password": "admin123",
-            "role": "admin"
-        }
-    }
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
-    st.session_state.role = None
-    st.session_state.username = None
-if "page" not in st.session_state:
-    st.session_state.page = "Overview"
+# -----------------------------
+# Initialize session state
+# -----------------------------
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "user_role" not in st.session_state:
+    st.session_state.user_role = None
+if "email" not in st.session_state:
+    st.session_state.email = None
 
-# ---------------- COLOR HELPERS ----------------
-def styled_header(text, color="#003366"):  # navy
-    st.markdown(f"<h2 style='color:{color};'>{text}</h2>", unsafe_allow_html=True)
+# -----------------------------
+# Sample users (mock)
+# -----------------------------
+users_db = {
+    "admin@example.com": {"password": "admin123", "role": "admin", "name": "Admin User"},
+    "user@example.com": {"password": "user123", "role": "user", "name": "Field Assessor"}
+}
 
-def styled_subheader(text, color="#006400"):  # green
-    st.markdown(f"<h4 style='color:{color};'>{text}</h4>", unsafe_allow_html=True)
-
-def colored_button(label, color="#006400"):
-    st.markdown(f"""
-        <style>
-        div.stButton > button:first-child {{
-            background-color: {color};
-            color: white;
-            height: 40px;
-            width: 100%;
-            border-radius:10px;
-            border: none;
-            font-size:16px;
-            font-weight:bold;
-        }}
-        </style>
-        """, unsafe_allow_html=True)
-    return st.button(label)
-
-# ---------------- LOGOUT ----------------
-def logout():
-    st.session_state.authenticated = False
-    st.session_state.role = None
-    st.session_state.username = None
-    st.session_state.page = "Overview"
-    st.experimental_rerun()
-
-# ---------------- OVERVIEW PAGE ----------------
+# -----------------------------
+# Helper functions
+# -----------------------------
 def overview_page():
-    col_overview, col_auth = st.columns([3, 1])
+    st.markdown(
+        """
+        ## Nigerians in Diaspora Advanced Health Programme (NiDAH)
+        Nigeria's health system faces critical challenges, including shortage of skilled health workers, infrastructural deficits, and gaps in specialized medical services.
+        
+        Thousands of Nigerian health professionals in the diaspora can play a key role in strengthening health systems in Nigeria through structured short-term engagements.
+        
+        The NiDAH Portal facilitates **facility profiling**, **program registration**, and **national reporting** to bridge this gap.
+        """,
+        unsafe_allow_html=True
+    )
 
-    # Overview left
-    with col_overview:
-        styled_header("Nigerians in Diaspora Advanced Health Programme (NiDAH)")
-        styled_subheader("Overview")
+def login_page():
+    st.markdown("<h1 style='color:navy'>NiDAH Portal</h1>", unsafe_allow_html=True)
+    st.write("### Sign In")
+    
+    col1, col2 = st.columns([2,1])
+    with col1:
+        email_input = st.text_input("Email")
+        password_input = st.text_input("Password", type="password")
+        if st.button("Login"):
+            if email_input in users_db and users_db[email_input]["password"] == password_input:
+                st.session_state.logged_in = True
+                st.session_state.user_role = users_db[email_input]["role"]
+                st.session_state.email = email_input
+                st.success(f"Logged in as {users_db[email_input]['role'].title()}")
+            else:
+                st.error("Invalid credentials")
+    with col2:
+        if st.button("Sign Up"):
+            st.session_state.signup = True
+        if st.button("Forgot Password"):
+            st.info("Password reset feature not implemented in mock portal.")
 
-        overview_text = """
-Nigeria's health system, despite pockets of excellence, faces significant challenges, including a critical shortage 
-of skilled health workers, infrastructural deficits, and gaps in specialized medical services. A primary driver of this 
-human resource crisis is the continuous emigration of highly trained medical professionals to higher-income countries 
-in search of better opportunities—a phenomenon known as "japa." The World Health Organization (WHO) estimates a 
-shortage of nearly 300,000 doctors and nurses in Nigeria, a gap that severely impacts healthcare delivery, particularly 
-in rural and underserved communities.
-
-Paradoxically, Nigeria possesses a vast and highly skilled diaspora of health professionals who are global leaders in 
-their respective fields. Thousands of Nigerian doctors, nurses, pharmacists, and allied health professionals are making 
-significant contributions to the health systems of countries like the United States, the United Kingdom, Canada, and Saudi Arabia. 
-This community represents an immense reservoir of knowledge, advanced clinical skills, and modern healthcare management 
-expertise that is currently underutilized for national development.
-
-International evidence indicates that diaspora health workers can play a critical role in strengthening health systems 
-and services in low- or middle-income countries of heritage, as well as in their host countries. While permanent return 
-is a complex personal decision, there is a strong, expressed desire among many diaspora professionals to contribute to 
-Nigeria's development. A structured, short-term engagement scheme offers a pragmatic "brain circulation" or "brain gain" 
-model, providing a bridge for this talent to flow back into the country, even if temporarily.
-
-The Nigerian Diaspora Health Vanguard Initiative (NDHVI) is conceived as a formal, sustainable mechanism to facilitate 
-this two-way exchange, transforming brain drain into a strategic national asset.
-"""
-        st.markdown(f"<div style='color:#003366'>{overview_text}</div>", unsafe_allow_html=True)
-
-    # Login form right
-    with col_auth:
-        styled_header("NiDAH Login", color="#006400")
-
-        with st.form("login_form"):
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            login_btn = st.form_submit_button("Login")
-
-            if login_btn:
-                users = st.session_state.users
-                if username in users and users[username]["password"] == password:
-                    st.session_state.authenticated = True
-                    st.session_state.role = users[username]["role"]
-                    st.session_state.username = username
-                    st.session_state.page = "Main"
-                    st.success("Login successful")
-                    st.experimental_rerun()
-                else:
-                    st.error("Invalid username or password")
-
-        # Sign Up / Forgot Password buttons below login
-        col1, col2 = st.columns([1,1])
-        with col1:
-            if colored_button("Sign Up", "#006400"):
-                st.session_state.page = "Sign Up"
-        with col2:
-            if colored_button("Forgot Password", "#003366"):
-                st.session_state.page = "Forgot Password"
-
-# ---------------- SIGN UP PAGE ----------------
 def signup_page():
-    st.title("Sign Up for NiDAH Portal")
+    st.write("### Create a New Account")
     with st.form("signup_form"):
         full_name = st.text_input("Full Name")
         location = st.text_input("Location")
-        email = st.text_input("Email Address")
-        username = st.text_input("Username")
+        email = st.text_input("Email")
         password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
-        submit = st.form_submit_button("Create Account")
+        submitted = st.form_submit_button("Register")
+        if submitted:
+            users_db[email] = {"password": password, "role": "user", "name": full_name}
+            st.success("Account created successfully! Please login.")
+            st.session_state.signup = False
 
-        if submit:
-            users = st.session_state.users
-            if not (full_name and location and email and username and password):
-                st.error("All fields are required")
-            elif username in users:
-                st.error("Username already exists")
-            elif password != confirm_password:
-                st.error("Passwords do not match")
-            else:
-                users[username] = {
-                    "full_name": full_name,
-                    "location": location,
-                    "email": email,
-                    "password": password,
-                    "role": "user"
-                }
-                st.success("Account created successfully! Please log in.")
-                st.session_state.page = "Overview"
-                st.experimental_rerun()
+def admin_dashboard():
+    st.sidebar.title("NiDAH Portal (Admin)")
+    menu = st.sidebar.radio(
+        "Navigation",
+        ["Dashboard", "Facility Profiling", "Health Programs", "Reports", "Users"]
+    )
 
-# ---------------- MAIN APP ----------------
-def main_app():
-    st.sidebar.markdown("<h3 style='color:#003366'>NiDAH Portal</h3>", unsafe_allow_html=True)
-    st.sidebar.markdown(f"**User:** {st.session_state.username}")
-    st.sidebar.markdown(f"**Role:** {st.session_state.role.capitalize()}")
-    if colored_button("Logout", "#003366"):
-        logout()
+    st.title("Admin Dashboard")
 
-    # Sidebar menu by role
-    if st.session_state.role == "admin":
-        menu = st.sidebar.radio("Navigation",
-            ["Dashboard", "Facility Profiling", "Indicators", "Health Programs", "Reports", "Users"])
-    else:
-        menu = st.sidebar.radio("Navigation",
-            ["Dashboard", "Facility Profiling", "Health Programs"])
-
-    st.title("NiDAH Portal")
-    st.divider()
-
-    # ---------------- DASHBOARD ----------------
-    if menu=="Dashboard":
+    if menu == "Dashboard":
+        st.subheader("Overview Metrics")
         col1, col2, col3, col4 = st.columns(4)
-        for col, label, value in zip(
-            [col1,col2,col3,col4],
-            ["Participating Facilities","States/Regions Covered","Key Health Indicators","Pending Assessments"],
-            [128,32,54,17]):
-            col.markdown(f"<div style='background-color:#006400;color:white;padding:10px;border-radius:10px;text-align:center;font-weight:bold'>{label}<br>{value}</div>", unsafe_allow_html=True)
+        col1.metric("Facilities Assessed", 128)
+        col2.metric("States Covered", 32)
+        col3.metric("Indicators", 54)
+        col4.metric("Pending Reviews", 17)
 
         st.subheader("Assessment Progress (Mock Data)")
-        data = pd.DataFrame({"Month":["Jan","Feb","Mar","Apr","May"],"Completed Assessments":[12,28,45,78,128]})
+        data = pd.DataFrame({
+            "Month": ["Jan", "Feb", "Mar", "Apr", "May"],
+            "Completed Assessments": [12, 28, 45, 78, 128]
+        })
         st.line_chart(data.set_index("Month"))
 
-    # ---------------- FACILITY PROFILING ----------------
-    elif menu=="Facility Profiling":
-        styled_subheader("New Facility Profiling", "#003366")
+    elif menu == "Facility Profiling":
+        st.subheader("New Facility Profiling")
         with st.form("facility_form"):
             facility_name = st.text_input("Facility Name")
-            state = st.selectbox("State/Region", ["Lagos","Abuja","Kano","Oyo"])
-            facility_type = st.selectbox("Facility Type", ["Primary","Secondary","Tertiary"])
+            state = st.selectbox("State", ["Lagos", "Abuja", "Kano", "Oyo"])
+            facility_type = st.selectbox("Facility Type", ["Primary", "Secondary", "Tertiary"])
             assessor = st.text_input("Assessor Name")
-            assessment_date = st.date_input("Profiling Date", datetime.today())
+            assessment_date = st.date_input("Assessment Date", datetime.today())
             submitted = st.form_submit_button("Submit Profiling")
             if submitted:
                 st.success("Facility profiling captured (mock submission).")
 
-    # ---------------- INDICATORS (ADMIN ONLY) ----------------
-    elif menu=="Indicators" and st.session_state.role=="admin":
-        styled_subheader("NiDAH Indicators", "#006400")
-        indicators = pd.DataFrame({
-            "Code":["NH01","NH02","NH03"],
-            "Indicator":["Availability of Electronic Health Records",
-                        "Internet Connectivity in Facility",
-                        "Digital Health Skills of Staff"],
-            "Score (Mock)":[3,2,4]
-        })
-        st.dataframe(indicators, use_container_width=True)
+    elif menu == "Health Programs":
+        st.subheader("Health Programs Management")
+        programs = pd.DataFrame([
+            {"Program": "Maternal & Child Health", "Status": "Active"},
+            {"Program": "Digital Health Training", "Status": "Active"},
+            {"Program": "Telemedicine Expansion", "Status": "Planned"},
+            {"Program": "Health Facility Upgrades", "Status": "Ongoing"},
+        ])
+        st.dataframe(programs, use_container_width=True)
 
-    # ---------------- HEALTH PROGRAMS ----------------
-    elif menu=="Health Programs":
-        styled_subheader("NiDAH Health Programs Registration", "#003366")
-        programs = ["Training","Advanced Procedures","Other Interest","Maternal & Child Health",
-                    "Digital Health Training","Telemedicine Expansion","Health Facility Upgrades"]
-        st.write("Select program(s) to register for:")
-
-        selected_programs = st.multiselect("Choose programs", programs)
-        with st.form("program_registration_form"):
-            specialty = st.text_input("Your Specialty")
-            qualification = st.text_input("Your Qualification")
-            submit_program = st.form_submit_button("Register for Selected Programs")
-        if submit_program:
-            if not selected_programs:
-                st.warning("Select at least one program")
-            elif not (specialty and qualification):
-                st.warning("Fill specialty and qualification")
-            else:
-                if "user_programs" not in st.session_state:
-                    st.session_state.user_programs = {}
-                user_info = st.session_state.users[st.session_state.username]
-                registrations = st.session_state.user_programs.get(st.session_state.username, [])
-                for prog in selected_programs:
-                    registrations.append({"Program":prog,"Full Name":user_info["full_name"],
-                                          "Location":user_info["location"],"Specialty":specialty,
-                                          "Qualification":qualification})
-                st.session_state.user_programs[st.session_state.username] = registrations
-                st.success(f"Registered for: {', '.join(selected_programs)}")
-        # Show current registrations
-        if "user_programs" in st.session_state and st.session_state.username in st.session_state.user_programs:
-            st.table(pd.DataFrame(st.session_state.user_programs[st.session_state.username]))
-
-    # ---------------- REPORTS (ADMIN ONLY) ----------------
-    elif menu=="Reports":
-        styled_subheader("Reports", "#006400")
+    elif menu == "Reports":
+        st.subheader("Reports")
         st.info("National and state-level reports will be generated here.")
         if st.button("Generate Mock National Report"):
             st.success("National report generated (mock).")
 
-    # ---------------- USERS (ADMIN ONLY) ----------------
-    elif menu=="Users":
-        styled_subheader("Registered Users", "#003366")
-        users_df = pd.DataFrame([{"Full Name":d.get("full_name",""),"Username":u,"Email":d.get("email",""),
-                                  "Location":d.get("location",""),"Role":d.get("role","")} for u,d in st.session_state.users.items()])
-        st.table(users_df)
+    elif menu == "Users":
+        st.subheader("Registered Users")
+        users_list = []
+        for email, info in users_db.items():
+            users_list.append({"Name": info["name"], "Role": info["role"].title(), "Email": email})
+        st.table(pd.DataFrame(users_list))
 
-# ---------------- APP ENTRY ----------------
-if st.session_state.page=="Overview":
-    overview_page()
-elif st.session_state.page=="Sign Up":
-    signup_page()
-else:
-    main_app()
+def user_dashboard():
+    st.sidebar.title("NiDAH Portal (User)")
+    menu = st.sidebar.radio(
+        "Navigation",
+        ["Overview", "Facility Profiling", "Health Programs", "Profile"]
+    )
+
+    st.title("User Dashboard")
+    if menu == "Overview":
+        st.write("Welcome! Please navigate using the sidebar to access your tasks.")
+
+    elif menu == "Facility Profiling":
+        st.subheader("New Facility Profiling")
+        with st.form("facility_form_user"):
+            facility_name = st.text_input("Facility Name")
+            state = st.selectbox("State", ["Lagos", "Abuja", "Kano", "Oyo"])
+            facility_type = st.selectbox("Facility Type", ["Primary", "Secondary", "Tertiary"])
+            assessor = st.text_input("Assessor Name")
+            assessment_date = st.date_input("Assessment Date", datetime.today())
+            submitted = st.form_submit_button("Submit Profiling")
+            if submitted:
+                st.success("Facility profiling captured (mock submission).")
+
+    elif menu == "Health Programs":
+        st.subheader("Available Health Programs")
+        programs = pd.DataFrame([
+            {"Program": "Maternal & Child Health", "Status": "Active"},
+            {"Program": "Digital Health Training", "Status": "Active"},
+            {"Program": "Telemedicine Expansion", "Status": "Planned"},
+            {"Program": "Health Facility Upgrades", "Status": "Ongoing"},
+        ])
+        st.dataframe(programs, use_container_width=True)
+
+        st.write("### Register for a Program")
+        with st.form("program_registration"):
+            name = st.text_input("Full Name")
+            location = st.text_input("Location")
+            specialty = st.text_input("Specialty")
+            qualification = st.text_input("Qualification")
+            program_choice = st.selectbox("Program Choice", programs["Program"])
+            submitted = st.form_submit_button("Register")
+            if submitted:
+                st.success(f"Registered for {program_choice} (mock submission).")
+
+    elif menu == "Profile":
+        user_info = users_db.get(st.session_state.email, {})
+        st.subheader("My Profile")
+        st.write(f"Name: {user_info.get('name', '')}")
+        st.write(f"Email: {st.session_state.email}")
+        st.write(f"Role: {user_info.get('role', '')}")
+
+# -----------------------------
+# Main App Logic
+# -----------------------------
+def main():
+    st.markdown(
+        """
+        <style>
+        .css-1d391kg {background-color: #f5f5f5;}  /* sidebar background */
+        .stApp {background-color: #e6f2ff;}         /* page background */
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if "signup" in st.session_state and st.session_state.signup:
+        signup_page()
+    elif not st.session_state.logged_in:
+        col1, col2 = st.columns([2,3])
+        with col1:
+            overview_page()
+        with col2:
+            login_page()
+    else:
+        if st.session_state.user_role == "admin":
+            admin_dashboard()
+        else:
+            user_dashboard()
+
+    # Logout button at the bottom
+    if st.session_state.logged_in:
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.session_state.user_role = None
+            st.session_state.email = None
+            st.experimental_rerun()
+
+if __name__ == "__main__":
+    main()
