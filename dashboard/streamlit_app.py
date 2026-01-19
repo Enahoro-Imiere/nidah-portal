@@ -155,6 +155,12 @@ elif st.session_state.page == "register":
 elif st.session_state.page == "login":
     st.title("Sign In")
     
+    # Back to Homepage button
+    if st.button("← Back to Homepage"):
+        st.session_state.page = "home"
+    
+    st.markdown("---")
+    
     username_input = st.text_input("Username")
     password_input = st.text_input("Password", type="password")
     
