@@ -1,30 +1,34 @@
 import streamlit as st
-from sqlalchemy import text
-from db import get_engine
+from sqlalchemy import create_engine, text
 from datetime import date
 
 # ----------------------
-# Page state
+# DATABASE CONNECTION
+# ----------------------
+DB_USER = "nidah_user"
+DB_PASSWORD = "12345"
+DB_HOST = "localhost"
+DB_PORT = "5432"
+DB_NAME = "nidah_db"
+
+try:
+    engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    st.success("✅ Database connected successfully!")
+except Exception as e:
+    st.error("❌ Database connection failed!")
+    st.write(e)
+    st.stop()
+
+# ----------------------
+# PAGE STATE
 # ----------------------
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
 # ----------------------
-# Database connection
-# ----------------------
-engine = get_engine()
-
-try:
-    with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
-    st.success("Database connected successfully!")
-except Exception as e:
-    st.error("Database connection failed!")
-    st.write(e)
-    st.stop()
-
-# ----------------------
-# Page config
+# PAGE CONFIG
 # ----------------------
 st.set_page_config(
     page_title="NiDAH Portal",
@@ -33,98 +37,66 @@ st.set_page_config(
 )
 
 # ----------------------
-# Home / Landing Page
+# HOME / LANDING PAGE
 # ----------------------
 if st.session_state.page == "home":
-
-    st.markdown(
-        """
-        <style>
-        .overview-box {
-            background-color: #0f3d3e;
-            padding: 40px;
-            border-radius: 12px;
-            color: white;
-            height: 100%;
-        }
-        .overview-box h1 {
-            color: #ffffff;
-        }
-        .overview-box p {
-            font-size: 16px;
-            line-height: 1.6;
-        }
-        .action-box {
-            padding: 60px 40px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+    <style>
+    .overview-box {
+        background-color: #0f3d3e;
+        padding: 40px;
+        border-radius: 12px;
+        color: white;
+        height: 100%;
+    }
+    .overview-box h1 { color: #ffffff; }
+    .overview-box p { font-size: 16px; line-height: 1.6; }
+    .action-box { padding: 60px 40px; }
+    </style>
+    """, unsafe_allow_html=True)
 
     left, right = st.columns([2, 1])
 
-    # -------- LEFT: Overview --------
+    # -------- LEFT: OVERVIEW --------
     with left:
-        st.markdown(
-            """
-            <div class="overview-box">
-                <h1>NiDAH Programme Portal</h1>
-                <h4>National Integrated Diaspora Health Programme</h4>
-                <br>
-                <p>
-                The National Integrated Diaspora Health (NiDAH) Programme is a strategic
-                initiative aimed at strengthening Nigeria’s health system through structured
-                engagement of health professionals across training and service delivery.
-                </p>
+        st.markdown("""
+        <div class="overview-box">
+            <h1>NiDAH Programme Portal</h1>
+            <h4>National Integrated Diaspora Health Programme</h4>
+            <br>
+            <p>
+            The National Integrated Diaspora Health (NiDAH) Programme is a strategic
+            initiative aimed at strengthening Nigeria’s health system through structured
+            engagement of health professionals across training and service delivery.
+            </p>
+            <p>
+            This portal serves as the official platform for registration, programme selection,
+            coordination, and monitoring of NiDAH-supported activities nationwide.
+            </p>
+            <p>
+            Health professionals can apply for training opportunities or participate
+            in service delivery initiatives aligned with national health priorities.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-                <p>
-                This portal serves as the official platform for registration, programme selection,
-                coordination, and monitoring of NiDAH-supported activities nationwide.
-                </p>
-
-                <p>
-                Health professionals can apply for training opportunities or participate
-                in service delivery initiatives aligned with national health priorities.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    # -------- RIGHT: Actions --------
+    # -------- RIGHT: ACTIONS --------
     with right:
         st.markdown("<div class='action-box'>", unsafe_allow_html=True)
-
         st.subheader("Get Started")
-
         if st.button("📝 Health Professional Registration", use_container_width=True):
             st.session_state.page = "register"
             st.rerun()
-
         st.write("")
-
         if st.button("🔐 Admin Login", use_container_width=True):
             st.session_state.page = "admin_login"
             st.rerun()
-
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown(
-        """
-        <hr>
-        <p style="text-align:center; font-size: 0.85em; color: grey;">
-        © NiDAH Programme | Federal Ministry of Health & Social Welfare
-        </p>
-        """,
-        unsafe_allow_html=True
-    )
-
 # ----------------------
-# Health Professional Registration Page
+# REGISTRATION PAGE
 # ----------------------
 elif st.session_state.page == "register":
-
     st.title("Health Professional Registration")
     st.info("🔒 Your information will be stored securely and used strictly for NiDAH Programme purposes.")
 
@@ -134,23 +106,17 @@ elif st.session_state.page == "register":
         gender = st.selectbox("Gender", ["Male", "Female", "Prefer not to say"])
         nationality = st.text_input("Nationality")
         phone = st.text_input("Phone Number")
-        cadre = st.selectbox(
-            "Cadre", ["Oncology", "Cardiac Care", "Urology", "Neurology"]
-        )
+        cadre = st.selectbox("Cadre", ["Oncology", "Cardiac Care", "Urology", "Neurology"])
         sub_specialty = st.text_input("Sub-specialty")
         start_date = st.date_input("Start Date of Availability", min_value=date(2000,1,1))
         end_date = st.date_input("End Date of Availability", min_value=start_date)
         preferred_states = st.multiselect("Preferred States (max 3)", ["Lagos","Kano","Rivers","Delta","Abuja"])
         preferred_lgas = st.text_input("Preferred LGAs (after selecting states)")
-
-        consent = st.checkbox(
-            "I consent to the storage and use of my information for the NiDAH Programme"
-        )
+        consent = st.checkbox("I consent to the storage and use of my information for the NiDAH Programme")
 
         submitted = st.form_submit_button("Submit Registration")
 
         if submitted:
-            # validation
             if not consent:
                 st.error("Consent is required to proceed.")
             elif not full_name or not email:
@@ -161,7 +127,7 @@ elif st.session_state.page == "register":
                         insert_query = text("""
                             INSERT INTO health_professionals
                             (full_name, email, gender, nationality, phone, cadre, sub_specialty,
-                            start_date, end_date, preferred_states, preferred_lgas, consent)
+                             start_date, end_date, preferred_states, preferred_lgas, consent)
                             VALUES
                             (:full_name, :email, :gender, :nationality, :phone, :cadre, :sub_specialty,
                              :start_date, :end_date, :preferred_states, :preferred_lgas, :consent)
@@ -180,9 +146,9 @@ elif st.session_state.page == "register":
                             "preferred_lgas": preferred_lgas,
                             "consent": consent
                         })
-                    st.success("Registration saved to database successfully!")
+                    st.success("✅ Registration saved to database successfully!")
                 except Exception as e:
-                    st.error("Failed to save registration.")
+                    st.error("❌ Failed to save registration.")
                     st.write(e)
 
     if st.button("⬅ Back to Home"):
@@ -190,10 +156,9 @@ elif st.session_state.page == "register":
         st.rerun()
 
 # ----------------------
-# Admin Login Page
+# ADMIN LOGIN PAGE
 # ----------------------
 elif st.session_state.page == "admin_login":
-
     st.title("Admin Login")
 
     with st.form("admin_login_form"):
