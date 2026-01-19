@@ -1,27 +1,63 @@
 import streamlit as st
 
+# ----------------------------
+# Page configuration
+# ----------------------------
+st.set_page_config(
+    page_title="NiDAH Portal",
+    layout="wide",  # wide layout to allow columns
+    initial_sidebar_state="collapsed"
+)
+
+# ----------------------------
+# Custom CSS to limit content width and center
+# ----------------------------
+st.markdown(
+    """
+    <style>
+    /* Center content and limit max width */
+    .main .block-container {
+        max-width: 1200px;  /* Adjust for landscape feel */
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    /* Smooth scrollbar for overview if needed */
+    .scrollable-overview {
+        overflow-y: auto;
+        max-height: 600px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ----------------------------
 # Initialize session state for page navigation
+# ----------------------------
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
+# ----------------------------
 # Page title
+# ----------------------------
 st.title("NiDAH Portal")
 
-# Make left column wider (e.g., 3:1 ratio)
-col_left, col_right = st.columns([3, 1])  # left column now wider
+# ----------------------------
+# Layout: two columns (wider left)
+# ----------------------------
+col_left, col_right = st.columns([3, 1])
 
 # ----------------------------
-# LEFT COLUMN: Overview with background
+# LEFT COLUMN: Overview
 # ----------------------------
 with col_left:
     st.markdown(
         """
-        <div style="
+        <div class="scrollable-overview" style="
             background-color: #f0f8ff; 
             padding: 25px; 
-            border-radius: 30px;
-            height: 80%;
-            overflow-y: auto;
+            border-radius: 10px;
         ">
         <h3>Overview</h3>
         <p>
@@ -57,7 +93,7 @@ with col_left:
     )
 
 # ----------------------------
-# RIGHT COLUMN: Sign-in Pane with background
+# RIGHT COLUMN: Sign-in Pane
 # ----------------------------
 with col_right:
     st.markdown(
@@ -65,7 +101,7 @@ with col_right:
         <div style="
             background-color: #e6f7ff; 
             padding: 25px; 
-            border-radius: 30px;
+            border-radius: 10px;
         ">
         <h3>Sign In</h3>
         </div>
@@ -84,11 +120,11 @@ with col_right:
     with reg_col:
         if st.button("Register"):
             st.session_state.page = "register"
-            st.write("Redirecting to registration page...")  # Replace with actual registration logic
+            st.write("Redirecting to registration page...")
     with fp_col:
         if st.button("Forgot Password"):
             st.session_state.page = "forgot_password"
-            st.write("Redirecting to password recovery...")  # Replace with actual recovery logic
+            st.write("Redirecting to password recovery...")
 
 # ----------------------------
 # PAGE NAVIGATION PLACEHOLDER
