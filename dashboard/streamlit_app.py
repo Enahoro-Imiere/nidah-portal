@@ -7,8 +7,8 @@ if "page" not in st.session_state:
 # Page title
 st.title("NiDAH Portal")
 
-# Layout: two columns
-col_left, col_right = st.columns([2, 1])  # left column wider
+# Make left column wider (e.g., 3:1 ratio)
+col_left, col_right = st.columns([3, 1])  # left column now wider
 
 # ----------------------------
 # LEFT COLUMN: Overview with background
@@ -18,7 +18,7 @@ with col_left:
         """
         <div style="
             background-color: #f0f8ff; 
-            padding: 20px; 
+            padding: 25px; 
             border-radius: 10px;
             height: 100%;
             overflow-y: auto;
@@ -64,7 +64,7 @@ with col_right:
         """
         <div style="
             background-color: #e6f7ff; 
-            padding: 20px; 
+            padding: 25px; 
             border-radius: 10px;
         ">
         <h3>Sign In</h3>
