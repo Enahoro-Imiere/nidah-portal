@@ -1,268 +1,191 @@
 import streamlit as st
 
 # ----------------------------
-# Page configuration
-# ----------------------------
-st.set_page_config(
-    page_title="NiDAH Portal",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-# ----------------------------
-# Custom CSS
-# ----------------------------
-st.markdown("""
-<style>
-.main .block-container {
-    max-width: 1200px;
-    padding-left: 20px;
-    padding-right: 20px;
-}
-.scrollable-overview {
-    overflow-y: auto;
-    max-height: 600px;
-}
-.signin-pane {
-    background-color: #e6f7ff;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-.stTextInput>div>div>input, .stTextArea>div>div>textarea {
-    border-radius: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-}
-.stButton>button {
-    border-radius: 10px;
-    padding: 8px 20px;
-    background-color: #4a90e2;
-    color: white;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-}
-.stButton>button:hover {
-    background-color: #357abd;
-}
-.inline-btns .stButton>button {
-    width: 100%;
-    background-color: #4a90e2;
-}
-.inline-btns .stButton>button:hover {
-    background-color: #357abd;
-}
-.reg-card {
-    background-color: #f0f8ff;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    text-align: center;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ----------------------------
-# Session state for navigation
+# Initialize session state
 # ----------------------------
 if "page" not in st.session_state:
     st.session_state.page = "home"
 if "reg_page" not in st.session_state:
     st.session_state.reg_page = "choose_type"
 if "user_type_lookup" not in st.session_state:
-    # Placeholder for users: populate with database in the future
-    st.session_state.user_type_lookup = {}  # email -> type
+    st.session_state.user_type_lookup = {}  # Store users temporarily
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
 # ----------------------------
-# ---------- HOMEPAGE ----------
+# Homepage
 # ----------------------------
 if st.session_state.page == "home":
-    st.title("NiDAH Portal")
-    col_left, col_right = st.columns([3, 1])
-
-    # LEFT COLUMN: Overview
-    with col_left:
+    st.title("NiDAH Programme Portal")
+    
+    # Two-column layout: Overview | Sign-in
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.subheader("Overview")
         st.markdown("""
-        <div class="scrollable-overview" style="background-color: #f0f8ff; padding: 25px; border-radius: 15px;">
-        <h3>Overview</h3>
-        <p>
         Nigeria's health system, despite pockets of excellence, faces significant challenges, 
-        including a critical shortage of skilled health workers, infrastructural deficits, 
-        and gaps in specialized medical services. A primary driver of this human resource crisis 
-        is the continuous emigration of highly trained medical professionals to higher income 
-        countries in search of better opportunities—a phenomenon colloquially known as "japa." 
-        The WHO estimates a shortage of nearly 300,000 doctors and nurses in Nigeria.
-        </p>
-        <p>
-        Nigeria possesses a vast and highly skilled diaspora of health professionals who are global leaders 
-        in their respective fields. Thousands of Nigerian doctors, nurses, pharmacists, and allied health professionals
-        are making significant contributions to the health systems of countries like the US, UK, Canada, and Saudi Arabia.
-        This community represents an immense reservoir of knowledge and expertise currently underutilized for national development.
-        </p>
-        <p>
-        International evidence indicates that diaspora health workers can play a critical role 
-        in strengthening health systems in countries of heritage. A structured, short-term engagement 
-        scheme offers a pragmatic "brain circulation" model. The Nigerian Diaspora Health Vanguard Initiative (NDHVI) 
-        is conceived as a formal, sustainable mechanism to facilitate this two-way exchange.
-        </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # RIGHT COLUMN: Sign-in Pane
-    with col_right:
-        st.markdown('<div class="signin-pane">', unsafe_allow_html=True)
-        st.subheader("Sign In")
-        username = st.text_input("Email / Username")
-        password = st.text_input("Password", type="password")
+        including a shortage of skilled health workers, infrastructural deficits, and gaps in specialized medical services. 
+        A primary driver is the emigration of highly trained medical professionals, known as "japa."
         
+        Nigeria possesses a vast skilled diaspora in countries like the US, UK, Canada, and Saudi Arabia. 
+        The Nigerian Diaspora Health Vanguard Initiative (NDHVI) aims to facilitate structured short-term engagement, 
+        transforming brain drain into a strategic national asset.
+        """)
+    
+    with col2:
+        st.subheader("Sign In")
         if st.button("Sign In"):
             st.session_state.page = "login"
-
-        # Bottom row: Register and Forgot Password
-        reg_col, fp_col = st.columns(2)
-        with reg_col:
-            if st.button("Register"):
-                st.session_state.page = "register"
-        with fp_col:
-            if st.button("Forgot Password"):
-                st.session_state.page = "forgot_password"
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("---")
+        st.write("New here?")
+        if st.button("Register"):
+            st.session_state.page = "register"
+            st.session_state.reg_page = "choose_type"
 
 # ----------------------------
-# ---------- REGISTRATION PAGE ----------
+# Registration Page
 # ----------------------------
 elif st.session_state.page == "register":
-    st.title("Register for NiDAH Programme")
-
-    # Step 1: Choose registration type
+    st.title("Registration")
+    
     if st.session_state.reg_page == "choose_type":
-        st.subheader("Register as:")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("Health Professional"):
+        choice = st.radio("Register as:", ["Health Professional", "Association / Organization", "Facility"])
+        if st.button("Continue"):
+            if choice == "Health Professional":
                 st.session_state.reg_page = "health_professional"
-        with col2:
-            if st.button("Health Association / Organization"):
+            elif choice == "Association / Organization":
                 st.session_state.reg_page = "association"
-        with col3:
-            if st.button("Facility"):
+            elif choice == "Facility":
                 st.session_state.reg_page = "facility"
-
-    # ---------------- Health Professional Registration Form ----------------
+    
+    # --------- Health Professional Form ---------
     elif st.session_state.reg_page == "health_professional":
         st.subheader("Health Professional Registration")
         with st.form("hp_registration_form"):
             full_name = st.text_input("Full Name")
             country = st.text_input("Country")
-            state = st.text_input("State")  # Typed by user
+            state = st.text_input("State")
             email = st.text_input("Email Address")
+            username = st.text_input("Choose a Username")
+            password = st.text_input("Choose a Password", type="password")
             cadre = st.selectbox("Cadre", ["Medical Doctor", "Nurse", "Pharmacist"])
             specialty = st.text_input("Specialty")
             subspecialty = st.text_input("Sub-Specialty")
-
             consent = st.checkbox("I consent to the storage and use of my information for the NiDAH Programme")
-
+            
             submitted = st.form_submit_button("Submit Registration")
             if submitted:
                 if not consent:
                     st.error("You must give consent to continue.")
+                elif not username or not password or not email:
+                    st.error("Please fill in all required fields.")
                 else:
-                    st.session_state.user_type_lookup[email] = "health_professional"
-                    st.success(f"Thank you {full_name}! Your registration has been submitted successfully.")
-
-    # ---------------- Association / Organization Form ----------------
+                    st.session_state.user_type_lookup[email] = {
+                        "type": "health_professional",
+                        "username": username,
+                        "password": password
+                    }
+                    st.success(f"Thank you {full_name}! Registration successful.")
+                    st.session_state.page = "login"
+                    st.session_state.reg_page = "choose_type"
+    
+    # --------- Association / Organization Form ---------
     elif st.session_state.reg_page == "association":
-        st.subheader("Health Association / Organization Registration")
+        st.subheader("Association / Organization Registration")
         with st.form("assoc_form"):
             name = st.text_input("Name of Association / Organization")
             country = st.text_input("Country")
-            state = st.text_input("State")  # Typed by user
+            state = st.text_input("State")
             email = st.text_input("Email Address")
+            username = st.text_input("Choose a Username")
+            password = st.text_input("Choose a Password", type="password")
             consent = st.checkbox("I consent to the storage and use of this information for the NiDAH Programme")
             
             submitted = st.form_submit_button("Submit Registration")
             if submitted:
                 if not consent:
                     st.error("You must give consent to continue.")
+                elif not username or not password or not email:
+                    st.error("Please fill in all required fields.")
                 else:
-                    st.session_state.user_type_lookup[email] = "association"
-                    st.success(f"Thank you {name}! Your registration has been submitted successfully.")
-
-    # ---------------- Facility Registration Form ----------------
+                    st.session_state.user_type_lookup[email] = {
+                        "type": "association",
+                        "username": username,
+                        "password": password
+                    }
+                    st.success(f"Thank you {name}! Registration successful.")
+                    st.session_state.page = "login"
+                    st.session_state.reg_page = "choose_type"
+    
+    # --------- Facility Form ---------
     elif st.session_state.reg_page == "facility":
         st.subheader("Facility Registration")
         with st.form("facility_form"):
             facility_name = st.text_input("Name of Facility")
             state = st.text_input("State")
             needs = st.text_area("Facility Needs")
+            username = st.text_input("Choose a Username")
+            password = st.text_input("Choose a Password", type="password")
             consent = st.checkbox("I consent to the storage and use of this information for the NiDAH Programme")
             
             submitted = st.form_submit_button("Submit Registration")
             if submitted:
                 if not consent:
                     st.error("You must give consent to continue.")
+                elif not username or not password:
+                    st.error("Please fill in all required fields.")
                 else:
-                    st.session_state.user_type_lookup[facility_name] = "facility"
+                    st.session_state.user_type_lookup[facility_name] = {
+                        "type": "facility",
+                        "username": username,
+                        "password": password
+                    }
                     st.success(f"Thank you! The registration for {facility_name} has been submitted successfully.")
-
-    # Back button to choose registration type / homepage
-    if st.button("Back"):
-        st.session_state.reg_page = "choose_type"
-        st.session_state.page = "home"
+                    st.session_state.page = "login"
+                    st.session_state.reg_page = "choose_type"
 
 # ----------------------------
-# Login Page (checks user type)
+# Login Page
 # ----------------------------
 elif st.session_state.page == "login":
     st.title("Sign In")
     
-    email = st.text_input("Email")
+    email_or_name = st.text_input("Email / Facility Name")
     password = st.text_input("Password", type="password")
     
     if st.button("Sign In"):
-        user_type = st.session_state.user_type_lookup.get(email, None)
-        if not email or not password:
+        user_info = st.session_state.user_type_lookup.get(email_or_name)
+        if not email_or_name or not password:
             st.error("Please enter your credentials.")
-        elif user_type in ["health_professional", "association"]:
+        elif user_info and password == user_info["password"]:
             st.session_state.page = "dashboard"
-            st.session_state.user_email = email
-        elif user_type == "facility":
-            st.error("Facility registrations cannot log in.")
+            st.session_state.user_email = email_or_name
         else:
-            st.error("Email not found or invalid credentials.")
+            st.error("Invalid credentials.")
 
 # ----------------------------
-# User Dashboard Page
+# Dashboard Page
 # ----------------------------
 elif st.session_state.page == "dashboard":
     st.title(f"Welcome, {st.session_state.user_email}")
-    st.subheader("Choose a Program to Volunteer In")
-
-    # Program selection
-    program = st.selectbox("Select Program", ["", "Services", "Training"])
-
-    if program == "Services":
-        service = st.selectbox("Select Service", ["", "Neurology", "Urology", "Gynaecology"])
-        if service:
-            st.success(f"You selected to volunteer in **{service}** service.")
+    user_info = st.session_state.user_type_lookup.get(st.session_state.user_email)
     
-    elif program == "Training":
-        training_type = st.selectbox("Select Training Type", ["", "Virtual", "Hybrid", "Physical"])
-        if training_type:
-            st.success(f"You selected to participate in **{training_type}** training.")
-    
-    # Logout button
+    if user_info["type"] in ["health_professional", "association"]:
+        st.subheader("Choose a Program to Volunteer In")
+        program = st.selectbox("Select Program", ["", "Services", "Training"])
+        if program == "Services":
+            service = st.selectbox("Select Service", ["", "Neurology", "Urology", "Gynaecology"])
+            if service:
+                st.success(f"You selected to volunteer in **{service}** service.")
+        elif program == "Training":
+            training_type = st.selectbox("Select Training Type", ["", "Virtual", "Hybrid", "Physical"])
+            if training_type:
+                st.success(f"You selected to participate in **{training_type}** training.")
+    elif user_info["type"] == "facility":
+        st.subheader("Facility Dashboard")
+        st.write("Here you could manage your facility profile, needs, and updates.")
+
     if st.button("Logout"):
         st.session_state.page = "home"
         st.session_state.user_email = None
-
-# ----------------------------
-# Forgot Password Page Placeholder
-# ----------------------------
-elif st.session_state.page == "forgot_password":
-    st.title("Forgot Password")
-    st.write("Forgot password form would appear here.")
