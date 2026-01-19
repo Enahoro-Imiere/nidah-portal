@@ -11,42 +11,67 @@ st.title("NiDAH Portal")
 col_left, col_right = st.columns([2, 1])  # left column wider
 
 # ----------------------------
-# LEFT COLUMN: Overview
+# LEFT COLUMN: Overview with background
 # ----------------------------
 with col_left:
-    st.subheader("Overview")
-    st.markdown("""
-    Nigeria's health system, despite pockets of excellence, faces significant challenges, 
-    including a critical shortage of skilled health workers, infrastructural deficits, 
-    and gaps in specialized medical services. A primary driver of this human resource crisis 
-    is the continuous emigration of highly trained medical professionals to higher income 
-    countries in search of better opportunities—a phenomenon colloquially known as "japa." 
-    The World Health Organization (WHO) estimates a shortage of nearly 300,000 doctors and 
-    nurses in Nigeria, a gap that severely impacts healthcare delivery, particularly in 
-    rural and underserved communities.
-
-    Paradoxically, Nigeria possesses a vast and highly skilled diaspora of health professionals 
-    who are global leaders in their respective fields. Thousands of Nigerian doctors, nurses, 
-    pharmacists, and allied health professionals are making significant contributions to the 
-    health systems of countries like the United States, the United Kingdom, Canada, and Saudi Arabia. 
-    This community represents an immense reservoir of knowledge, advanced clinical skills, 
-    and modern healthcare management expertise that is currently underutilized for national development.
-
-    International evidence indicates that diaspora health workers can play a critical role 
-    in strengthening health systems and services in low- or middle-income countries of heritage, 
-    as well as in their host countries. While permanent return is a complex personal decision, 
-    there is a strong, expressed desire among many diaspora professionals to contribute to Nigeria's development. 
-    A structured, short-term engagement scheme offers a pragmatic "brain circulation" or "brain gain" model, 
-    providing a bridge for this talent to flow back into the country, even if temporarily. 
-    The Nigerian Diaspora Health Vanguard Initiative (NDHVI) is conceived as a formal, sustainable mechanism 
-    to facilitate this two-way exchange, transforming brain drain into a strategic national asset.
-    """)
+    st.markdown(
+        """
+        <div style="
+            background-color: #f0f8ff; 
+            padding: 20px; 
+            border-radius: 10px;
+            height: 100%;
+            overflow-y: auto;
+        ">
+        <h3>Overview</h3>
+        <p>
+        Nigeria's health system, despite pockets of excellence, faces significant challenges, 
+        including a critical shortage of skilled health workers, infrastructural deficits, 
+        and gaps in specialized medical services. A primary driver of this human resource crisis 
+        is the continuous emigration of highly trained medical professionals to higher income 
+        countries in search of better opportunities—a phenomenon colloquially known as "japa." 
+        The World Health Organization (WHO) estimates a shortage of nearly 300,000 doctors and 
+        nurses in Nigeria, a gap that severely impacts healthcare delivery, particularly in 
+        rural and underserved communities.
+        </p>
+        <p>
+        Paradoxically, Nigeria possesses a vast and highly skilled diaspora of health professionals 
+        who are global leaders in their respective fields. Thousands of Nigerian doctors, nurses, 
+        pharmacists, and allied health professionals are making significant contributions to the 
+        health systems of countries like the United States, the United Kingdom, Canada, and Saudi Arabia. 
+        This community represents an immense reservoir of knowledge, advanced clinical skills, 
+        and modern healthcare management expertise that is currently underutilized for national development.
+        </p>
+        <p>
+        International evidence indicates that diaspora health workers can play a critical role 
+        in strengthening health systems and services in low- or middle-income countries of heritage, 
+        as well as in their host countries. While permanent return is a complex personal decision, 
+        there is a strong, expressed desire among many diaspora professionals to contribute to Nigeria's development. 
+        A structured, short-term engagement scheme offers a pragmatic "brain circulation" or "brain gain" model, 
+        providing a bridge for this talent to flow back into the country, even if temporarily. 
+        The Nigerian Diaspora Health Vanguard Initiative (NDHVI) is conceived as a formal, sustainable mechanism 
+        to facilitate this two-way exchange, transforming brain drain into a strategic national asset.
+        </p>
+        </div>
+        """, unsafe_allow_html=True
+    )
 
 # ----------------------------
-# RIGHT COLUMN: Sign-in Pane
+# RIGHT COLUMN: Sign-in Pane with background
 # ----------------------------
 with col_right:
-    st.subheader("Sign In")
+    st.markdown(
+        """
+        <div style="
+            background-color: #e6f7ff; 
+            padding: 20px; 
+            border-radius: 10px;
+        ">
+        <h3>Sign In</h3>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
     username = st.text_input("Email / Username")
     password = st.text_input("Password", type="password")
     
