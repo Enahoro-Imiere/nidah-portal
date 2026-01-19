@@ -3,6 +3,103 @@ from db import get_engine
 import pandas as pd
 from datetime import date
 
+# ---------------- PAGE STATE ----------------
+if "page" not in st.session_state:
+    st.session_state.page = "home"
+
+
+# ---------------- PAGE CONFIG ----------------
+st.set_page_config(
+    page_title="NiDAH Portal",
+    page_icon="🏥",
+    layout="centered"
+)
+
+if st.session_state.page == "home":
+    # Landing page content
+
+elif st.session_state.page == "register":
+    # Registration form
+
+elif st.session_state.page == "admin_login":
+    # Admin login page
+
+
+# ---------------- HEADER ----------------
+st.markdown(
+    """
+    <h1 style="text-align:center;">NiDAH Programme Portal</h1>
+    <h4 style="text-align:center; color: grey;">
+    National Integrated Diaspora Health Programme
+    </h4>
+    """,
+    unsafe_allow_html=True
+)
+
+st.divider()
+
+# ---------------- OVERVIEW ----------------
+st.markdown(
+    """
+    ### Programme Overview
+
+    The **National Integrated Diaspora Health (NiDAH) Programme** is designed to strengthen
+    Nigeria’s healthcare system by facilitating structured engagement of health professionals
+    across training and service delivery initiatives.
+
+    This portal serves as the official platform for **registration, programme selection,
+    and coordination** of participating health professionals and institutions.
+    """
+)
+
+# ---------------- WHAT YOU CAN DO ----------------
+st.markdown(
+    """
+    ### What You Can Do on This Portal
+
+    - Register as a **Health Professional**
+    - Apply for **Training Programmes** (Hybrid, Virtual, Physical)
+    - Participate in **Service Delivery Initiatives**
+    - Select preferred locations and programme tracks
+    - Enable programme monitoring and reporting
+    """
+)
+
+# ---------------- WHO SHOULD REGISTER ----------------
+st.markdown(
+    """
+    ### Who Should Register
+
+    - Medical specialists and subspecialists
+    - Diaspora health professionals
+    - Local healthcare practitioners supporting NiDAH initiatives
+    """
+)
+
+st.divider()
+
+# ---------------- CALL TO ACTION ----------------
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("📝 Health Professional Registration", use_container_width=True):
+        st.session_state.page = "register"
+
+with col2:
+    if st.button("🔐 Admin Login", use_container_width=True):
+        st.session_state.page = "admin_login"
+
+# ---------------- FOOTER ----------------
+st.markdown(
+    """
+    <hr>
+    <p style="text-align:center; color: grey; font-size: 0.85em;">
+    © NiDAH Programme | Federal Ministry of Health & Social Welfare
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
 # --- Form ---
 st.header("NiDAH Health Professional Registration")
 
