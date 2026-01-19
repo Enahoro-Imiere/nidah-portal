@@ -71,6 +71,11 @@ if "page" not in st.session_state:
     st.session_state.page = "home"
 if "reg_page" not in st.session_state:
     st.session_state.reg_page = "choose_type"
+if "user_type_lookup" not in st.session_state:
+    # Placeholder for users: populate with database in the future
+    st.session_state.user_type_lookup = {}  # email -> type
+if "user_email" not in st.session_state:
+    st.session_state.user_email = None
 
 # ----------------------------
 # ---------- HOMEPAGE ----------
@@ -116,7 +121,6 @@ if st.session_state.page == "home":
         
         if st.button("Sign In"):
             st.session_state.page = "login"
-            st.write("Signing in...")  # Replace with actual login logic
 
         # Bottom row: Register and Forgot Password
         reg_col, fp_col = st.columns(2)
@@ -126,7 +130,6 @@ if st.session_state.page == "home":
         with fp_col:
             if st.button("Forgot Password"):
                 st.session_state.page = "forgot_password"
-                st.write("Redirecting to password recovery...")
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ----------------------------
@@ -168,6 +171,7 @@ elif st.session_state.page == "register":
                 if not consent:
                     st.error("You must give consent to continue.")
                 else:
+                    st.session_state.user_type_lookup[email] = "health_professional"
                     st.success(f"Thank you {full_name}! Your registration has been submitted successfully.")
 
     # ---------------- Association / Organization Form ----------------
@@ -185,6 +189,7 @@ elif st.session_state.page == "register":
                 if not consent:
                     st.error("You must give consent to continue.")
                 else:
+                    st.session_state.user_type_lookup[email] = "association"
                     st.success(f"Thank you {name}! Your registration has been submitted successfully.")
 
     # ---------------- Facility Registration Form ----------------
@@ -201,6 +206,7 @@ elif st.session_state.page == "register":
                 if not consent:
                     st.error("You must give consent to continue.")
                 else:
+                    st.session_state.user_type_lookup[facility_name] = "facility"
                     st.success(f"Thank you! The registration for {facility_name} has been submitted successfully.")
 
     # Back button to choose registration type / homepage
@@ -209,12 +215,54 @@ elif st.session_state.page == "register":
         st.session_state.page = "home"
 
 # ----------------------------
-# PAGE PLACEHOLDERS
+# Login Page (checks user type)
 # ----------------------------
 elif st.session_state.page == "login":
-    st.title("Login Page")
-    st.write("Login form would appear here.")
+    st.title("Sign In")
+    
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
+    
+    if st.button("Sign In"):
+        user_type = st.session_state.user_type_lookup.get(email, None)
+        if not email or not password:
+            st.error("Please enter your credentials.")
+        elif user_type in ["health_professional", "association"]:
+            st.session_state.page = "dashboard"
+            st.session_state.user_email = email
+        elif user_type == "facility":
+            st.error("Facility registrations cannot log in.")
+        else:
+            st.error("Email not found or invalid credentials.")
 
+# ----------------------------
+# User Dashboard Page
+# ----------------------------
+elif st.session_state.page == "dashboard":
+    st.title(f"Welcome, {st.session_state.user_email}")
+    st.subheader("Choose a Program to Volunteer In")
+
+    # Program selection
+    program = st.selectbox("Select Program", ["", "Services", "Training"])
+
+    if program == "Services":
+        service = st.selectbox("Select Service", ["", "Neurology", "Urology", "Gynaecology"])
+        if service:
+            st.success(f"You selected to volunteer in **{service}** service.")
+    
+    elif program == "Training":
+        training_type = st.selectbox("Select Training Type", ["", "Virtual", "Hybrid", "Physical"])
+        if training_type:
+            st.success(f"You selected to participate in **{training_type}** training.")
+    
+    # Logout button
+    if st.button("Logout"):
+        st.session_state.page = "home"
+        st.session_state.user_email = None
+
+# ----------------------------
+# Forgot Password Page Placeholder
+# ----------------------------
 elif st.session_state.page == "forgot_password":
-    st.title("Forgot Password Page")
+    st.title("Forgot Password")
     st.write("Forgot password form would appear here.")
