@@ -8,7 +8,7 @@ if "page" not in st.session_state:
 if "reg_page" not in st.session_state:
     st.session_state.reg_page = "choose_type"
 if "user_type_lookup" not in st.session_state:
-    st.session_state.user_type_lookup = {}  # Store users temporarily
+    st.session_state.user_type_lookup = {}  # Stores all users by username
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
@@ -78,12 +78,13 @@ elif st.session_state.page == "register":
             if submitted:
                 if not consent:
                     st.error("You must give consent to continue.")
-                elif not username or not password or not email:
+                elif not username or not password:
                     st.error("Please fill in all required fields.")
                 else:
-                    st.session_state.user_type_lookup[email] = {
+                    st.session_state.user_type_lookup[username] = {
                         "type": "health_professional",
-                        "username": username,
+                        "full_name": full_name,
+                        "email": email,
                         "password": password
                     }
                     st.success(f"Thank you {full_name}! Registration successful.")
@@ -106,12 +107,13 @@ elif st.session_state.page == "register":
             if submitted:
                 if not consent:
                     st.error("You must give consent to continue.")
-                elif not username or not password or not email:
+                elif not username or not password:
                     st.error("Please fill in all required fields.")
                 else:
-                    st.session_state.user_type_lookup[email] = {
+                    st.session_state.user_type_lookup[username] = {
                         "type": "association",
-                        "username": username,
+                        "name": name,
+                        "email": email,
                         "password": password
                     }
                     st.success(f"Thank you {name}! Registration successful.")
@@ -136,12 +138,14 @@ elif st.session_state.page == "register":
                 elif not username or not password:
                     st.error("Please fill in all required fields.")
                 else:
-                    st.session_state.user_type_lookup[facility_name] = {
+                    st.session_state.user_type_lookup[username] = {
                         "type": "facility",
-                        "username": username,
+                        "facility_name": facility_name,
+                        "state": state,
+                        "needs": needs,
                         "password": password
                     }
-                    st.success(f"Thank you! The registration for {facility_name} has been submitted successfully.")
+                    st.success(f"Thank you! Registration for {facility_name} submitted successfully.")
                     st.session_state.page = "login"
                     st.session_state.reg_page = "choose_type"
 
@@ -151,18 +155,18 @@ elif st.session_state.page == "register":
 elif st.session_state.page == "login":
     st.title("Sign In")
     
-    email_or_name = st.text_input("Email / Facility Name")
-    password = st.text_input("Password", type="password")
+    username_input = st.text_input("Username")
+    password_input = st.text_input("Password", type="password")
     
     if st.button("Sign In"):
-        user_info = st.session_state.user_type_lookup.get(email_or_name)
-        if not email_or_name or not password:
+        user_info = st.session_state.user_type_lookup.get(username_input)
+        if not username_input or not password_input:
             st.error("Please enter your credentials.")
-        elif user_info and password == user_info["password"]:
+        elif user_info and password_input == user_info["password"]:
             st.session_state.page = "dashboard"
-            st.session_state.user_email = email_or_name
+            st.session_state.user_email = username_input
         else:
-            st.error("Invalid credentials.")
+            st.error("Invalid username or password.")
 
 # ----------------------------
 # Dashboard Page
@@ -170,22 +174,29 @@ elif st.session_state.page == "login":
 elif st.session_state.page == "dashboard":
     st.title(f"Welcome, {st.session_state.user_email}")
     user_info = st.session_state.user_type_lookup.get(st.session_state.user_email)
-    
+
     if user_info["type"] in ["health_professional", "association"]:
-        st.subheader("Choose a Program to Volunteer In")
-        program = st.selectbox("Select Program", ["", "Services", "Training"])
-        if program == "Services":
+        st.subheader("Volunteer Programs")
+
+        # Collapsible panel for Services
+        with st.expander("Services"):
+            st.write("Choose a service to volunteer in:")
             service = st.selectbox("Select Service", ["", "Neurology", "Urology", "Gynaecology"])
             if service:
                 st.success(f"You selected to volunteer in **{service}** service.")
-        elif program == "Training":
+
+        # Collapsible panel for Training
+        with st.expander("Training"):
+            st.write("Choose a training type to participate in:")
             training_type = st.selectbox("Select Training Type", ["", "Virtual", "Hybrid", "Physical"])
             if training_type:
                 st.success(f"You selected to participate in **{training_type}** training.")
+
     elif user_info["type"] == "facility":
         st.subheader("Facility Dashboard")
-        st.write("Here you could manage your facility profile, needs, and updates.")
+        st.write("Manage your facility profile, needs, and updates here.")
 
+    st.markdown("---")
     if st.button("Logout"):
         st.session_state.page = "home"
         st.session_state.user_email = None
