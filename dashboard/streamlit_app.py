@@ -19,7 +19,7 @@ with col_left:
         <div style="
             background-color: #f0f8ff; 
             padding: 25px; 
-            border-radius: 3px;
+            border-radius: 30px;
             height: 80%;
             overflow-y: auto;
         ">
@@ -65,7 +65,7 @@ with col_right:
         <div style="
             background-color: #e6f7ff; 
             padding: 25px; 
-            border-radius: 3px;
+            border-radius: 30px;
         ">
         <h3>Sign In</h3>
         </div>
