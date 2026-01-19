@@ -16,13 +16,13 @@ st.set_page_config(
 )
 
 if st.session_state.page == "home":
-    # Landing page content
+    st.write("")  # placeholder OR your landing page code
 
 elif st.session_state.page == "register":
-    # Registration form
+    st.write("")  # registration page content
 
 elif st.session_state.page == "admin_login":
-    # Admin login page
+    st.write("")  # admin login page
 
 
 # ---------------- HEADER ----------------
