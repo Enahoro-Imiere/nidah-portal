@@ -8,20 +8,43 @@ if "page" not in st.session_state:
 if "reg_page" not in st.session_state:
     st.session_state.reg_page = "choose_type"
 if "user_type_lookup" not in st.session_state:
-    st.session_state.user_type_lookup = {}  # Stores all users by username
+    st.session_state.user_type_lookup = {}
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
 # ----------------------------
-# Homepage
+# Custom CSS for backgrounds
+# ----------------------------
+st.markdown("""
+<style>
+.overview-bg {
+    background-color: #e8f0fe;
+    padding: 20px;
+    border-radius: 10px;
+}
+.signin-bg {
+    background-color: #fef3e8;
+    padding: 20px;
+    border-radius: 10px;
+}
+.form-bg {
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ----------------------------
+# Homepage / Landing Page
 # ----------------------------
 if st.session_state.page == "home":
     st.title("NiDAH Programme Portal")
-    
-    # Two-column layout: Overview | Sign-in
+
     col1, col2 = st.columns([2, 1])
-    
+
     with col1:
+        st.markdown('<div class="overview-bg">', unsafe_allow_html=True)
         st.subheader("Overview")
         st.markdown("""
         Nigeria's health system, despite pockets of excellence, faces significant challenges, 
@@ -32,8 +55,10 @@ if st.session_state.page == "home":
         The Nigerian Diaspora Health Vanguard Initiative (NDHVI) aims to facilitate structured short-term engagement, 
         transforming brain drain into a strategic national asset.
         """)
-    
+        st.markdown('</div>', unsafe_allow_html=True)
+
     with col2:
+        st.markdown('<div class="signin-bg">', unsafe_allow_html=True)
         st.subheader("Sign In")
         if st.button("Sign In"):
             st.session_state.page = "login"
@@ -42,13 +67,17 @@ if st.session_state.page == "home":
         if st.button("Register"):
             st.session_state.page = "register"
             st.session_state.reg_page = "choose_type"
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ----------------------------
 # Registration Page
 # ----------------------------
 elif st.session_state.page == "register":
     st.title("Registration")
-    
+
+    if st.button("← Back to Homepage"):
+        st.session_state.page = "home"
+
     if st.session_state.reg_page == "choose_type":
         choice = st.radio("Register as:", ["Health Professional", "Association / Organization", "Facility"])
         if st.button("Continue"):
@@ -58,11 +87,12 @@ elif st.session_state.page == "register":
                 st.session_state.reg_page = "association"
             elif choice == "Facility":
                 st.session_state.reg_page = "facility"
-    
+
     # --------- Health Professional Form ---------
     elif st.session_state.reg_page == "health_professional":
         st.subheader("Health Professional Registration")
         with st.form("hp_registration_form"):
+            st.markdown('<div class="form-bg">', unsafe_allow_html=True)
             full_name = st.text_input("Full Name")
             country = st.text_input("Country")
             state = st.text_input("State")
@@ -73,8 +103,9 @@ elif st.session_state.page == "register":
             specialty = st.text_input("Specialty")
             subspecialty = st.text_input("Sub-Specialty")
             consent = st.checkbox("I consent to the storage and use of my information for the NiDAH Programme")
-            
             submitted = st.form_submit_button("Submit Registration")
+            st.markdown('</div>', unsafe_allow_html=True)
+
             if submitted:
                 if not consent:
                     st.error("You must give consent to continue.")
@@ -90,11 +121,12 @@ elif st.session_state.page == "register":
                     st.success(f"Thank you {full_name}! Registration successful.")
                     st.session_state.page = "login"
                     st.session_state.reg_page = "choose_type"
-    
+
     # --------- Association / Organization Form ---------
     elif st.session_state.reg_page == "association":
         st.subheader("Association / Organization Registration")
         with st.form("assoc_form"):
+            st.markdown('<div class="form-bg">', unsafe_allow_html=True)
             name = st.text_input("Name of Association / Organization")
             country = st.text_input("Country")
             state = st.text_input("State")
@@ -102,8 +134,9 @@ elif st.session_state.page == "register":
             username = st.text_input("Choose a Username")
             password = st.text_input("Choose a Password", type="password")
             consent = st.checkbox("I consent to the storage and use of this information for the NiDAH Programme")
-            
             submitted = st.form_submit_button("Submit Registration")
+            st.markdown('</div>', unsafe_allow_html=True)
+
             if submitted:
                 if not consent:
                     st.error("You must give consent to continue.")
@@ -119,19 +152,21 @@ elif st.session_state.page == "register":
                     st.success(f"Thank you {name}! Registration successful.")
                     st.session_state.page = "login"
                     st.session_state.reg_page = "choose_type"
-    
+
     # --------- Facility Form ---------
     elif st.session_state.reg_page == "facility":
         st.subheader("Facility Registration")
         with st.form("facility_form"):
+            st.markdown('<div class="form-bg">', unsafe_allow_html=True)
             facility_name = st.text_input("Name of Facility")
             state = st.text_input("State")
             needs = st.text_area("Facility Needs")
             username = st.text_input("Choose a Username")
             password = st.text_input("Choose a Password", type="password")
             consent = st.checkbox("I consent to the storage and use of this information for the NiDAH Programme")
-            
             submitted = st.form_submit_button("Submit Registration")
+            st.markdown('</div>', unsafe_allow_html=True)
+
             if submitted:
                 if not consent:
                     st.error("You must give consent to continue.")
@@ -155,15 +190,13 @@ elif st.session_state.page == "register":
 elif st.session_state.page == "login":
     st.title("Sign In")
     
-    # Back to Homepage button
     if st.button("← Back to Homepage"):
         st.session_state.page = "home"
-    
+
     st.markdown("---")
-    
     username_input = st.text_input("Username")
     password_input = st.text_input("Password", type="password")
-    
+
     if st.button("Sign In"):
         user_info = st.session_state.user_type_lookup.get(username_input)
         if not username_input or not password_input:
@@ -184,14 +217,14 @@ elif st.session_state.page == "dashboard":
     if user_info["type"] in ["health_professional", "association"]:
         st.subheader("Volunteer Programs")
 
-        # Collapsible panel for Services
+        # Services panel
         with st.expander("Services"):
             st.write("Choose a service to volunteer in:")
             service = st.selectbox("Select Service", ["", "Neurology", "Urology", "Gynaecology"])
             if service:
                 st.success(f"You selected to volunteer in **{service}** service.")
 
-        # Collapsible panel for Training
+        # Training panel
         with st.expander("Training"):
             st.write("Choose a training type to participate in:")
             training_type = st.selectbox("Select Training Type", ["", "Virtual", "Hybrid", "Physical"])
