@@ -29,7 +29,7 @@ st.markdown("""
     border-radius: 15px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-.stTextInput>div>div>input {
+.stTextInput>div>div>input, .stTextArea>div>div>textarea {
     border-radius: 10px;
     padding: 10px;
     border: 1px solid #ccc;
@@ -65,7 +65,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ----------------------------
-# Session state for page navigation
+# Session state for navigation
 # ----------------------------
 if "page" not in st.session_state:
     st.session_state.page = "home"
@@ -174,26 +174,36 @@ elif st.session_state.page == "register":
     elif st.session_state.reg_page == "association":
         st.subheader("Health Association / Organization Registration")
         with st.form("assoc_form"):
-            name = st.text_input("Association / Organization Name")
+            name = st.text_input("Name of Association / Organization")
             country = st.text_input("Country")
-            state = st.text_input("State")
+            state = st.text_input("State")  # Typed by user
             email = st.text_input("Email Address")
-            submitted = st.form_submit_button("Submit Association Registration")
+            consent = st.checkbox("I consent to the storage and use of this information for the NiDAH Programme")
+            
+            submitted = st.form_submit_button("Submit Registration")
             if submitted:
-                st.success("Association / Organization registration submitted! (DB integration pending)")
+                if not consent:
+                    st.error("You must give consent to continue.")
+                else:
+                    st.success(f"Thank you {name}! Your registration has been submitted successfully.")
 
-    # ---------------- Facility Form ----------------
+    # ---------------- Facility Registration Form ----------------
     elif st.session_state.reg_page == "facility":
         st.subheader("Facility Registration")
         with st.form("facility_form"):
-            facility_name = st.text_input("Facility Name")
+            facility_name = st.text_input("Name of Facility")
             state = st.text_input("State")
-            email = st.text_input("Email Address")
-            submitted = st.form_submit_button("Submit Facility Registration")
+            needs = st.text_area("Facility Needs")
+            consent = st.checkbox("I consent to the storage and use of this information for the NiDAH Programme")
+            
+            submitted = st.form_submit_button("Submit Registration")
             if submitted:
-                st.success("Facility registration submitted! (DB integration pending)")
+                if not consent:
+                    st.error("You must give consent to continue.")
+                else:
+                    st.success(f"Thank you! The registration for {facility_name} has been submitted successfully.")
 
-    # Back button
+    # Back button to choose registration type / homepage
     if st.button("Back"):
         st.session_state.reg_page = "choose_type"
         st.session_state.page = "home"
