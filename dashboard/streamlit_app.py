@@ -20,12 +20,12 @@ st.markdown("""
 .overview-bg {
     background-color: #e8f0fe;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 100px;
 }
 .signin-bg {
     background-color: #fef3e8;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 100px;
 }
 .form-bg {
     background-color: #f4f4f4;
