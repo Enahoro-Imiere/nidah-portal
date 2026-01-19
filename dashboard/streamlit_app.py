@@ -1,23 +1,40 @@
 import streamlit as st
+from sqlalchemy import text
+from db import get_engine
+from datetime import date
 
-# =====================================================
-# PAGE STATE (MUST BE AT THE VERY TOP)
-# =====================================================
+# ----------------------
+# Page state
+# ----------------------
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
-# =====================================================
-# PAGE CONFIG
-# =====================================================
+# ----------------------
+# Database connection
+# ----------------------
+engine = get_engine()
+
+try:
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    st.success("Database connected successfully!")
+except Exception as e:
+    st.error("Database connection failed!")
+    st.write(e)
+    st.stop()
+
+# ----------------------
+# Page config
+# ----------------------
 st.set_page_config(
     page_title="NiDAH Portal",
     page_icon="🏥",
     layout="wide"
 )
 
-# =====================================================
-# HOME / LANDING PAGE
-# =====================================================
+# ----------------------
+# Home / Landing Page
+# ----------------------
 if st.session_state.page == "home":
 
     st.markdown(
@@ -47,7 +64,7 @@ if st.session_state.page == "home":
 
     left, right = st.columns([2, 1])
 
-    # -------- LEFT: OVERVIEW --------
+    # -------- LEFT: Overview --------
     with left:
         st.markdown(
             """
@@ -75,7 +92,7 @@ if st.session_state.page == "home":
             unsafe_allow_html=True
         )
 
-    # -------- RIGHT: ACTIONS --------
+    # -------- RIGHT: Actions --------
     with right:
         st.markdown("<div class='action-box'>", unsafe_allow_html=True)
 
@@ -103,15 +120,13 @@ if st.session_state.page == "home":
         unsafe_allow_html=True
     )
 
-# =====================================================
-# HEALTH PROFESSIONAL REGISTRATION PAGE
-# =====================================================
+# ----------------------
+# Health Professional Registration Page
+# ----------------------
 elif st.session_state.page == "register":
 
     st.title("Health Professional Registration")
-    st.write("Please complete the form below to register for the NiDAH Programme.")
-
-    st.info("🔒 Your information will be stored securely and used strictly for programme purposes.")
+    st.info("🔒 Your information will be stored securely and used strictly for NiDAH Programme purposes.")
 
     with st.form("registration_form"):
         full_name = st.text_input("Full Name")
@@ -119,36 +134,64 @@ elif st.session_state.page == "register":
         gender = st.selectbox("Gender", ["Male", "Female", "Prefer not to say"])
         nationality = st.text_input("Nationality")
         phone = st.text_input("Phone Number")
-
         cadre = st.selectbox(
-            "Cadre",
-            ["Oncology", "Cardiac Care", "Urology", "Neurology"]
+            "Cadre", ["Oncology", "Cardiac Care", "Urology", "Neurology"]
         )
-
         sub_specialty = st.text_input("Sub-specialty")
+        start_date = st.date_input("Start Date of Availability", min_value=date(2000,1,1))
+        end_date = st.date_input("End Date of Availability", min_value=start_date)
+        preferred_states = st.multiselect("Preferred States (max 3)", ["Lagos","Kano","Rivers","Delta","Abuja"])
+        preferred_lgas = st.text_input("Preferred LGAs (after selecting states)")
 
         consent = st.checkbox(
-            "I consent to the storage and use of my information for the purposes of the NiDAH Programme."
+            "I consent to the storage and use of my information for the NiDAH Programme"
         )
 
         submitted = st.form_submit_button("Submit Registration")
 
         if submitted:
+            # validation
             if not consent:
                 st.error("Consent is required to proceed.")
             elif not full_name or not email:
                 st.error("Full Name and Email are required.")
             else:
-                st.success("Registration submitted successfully.")
-                st.write("🔜 Database save will be connected next.")
+                try:
+                    with engine.connect() as conn:
+                        insert_query = text("""
+                            INSERT INTO health_professionals
+                            (full_name, email, gender, nationality, phone, cadre, sub_specialty,
+                            start_date, end_date, preferred_states, preferred_lgas, consent)
+                            VALUES
+                            (:full_name, :email, :gender, :nationality, :phone, :cadre, :sub_specialty,
+                             :start_date, :end_date, :preferred_states, :preferred_lgas, :consent)
+                        """)
+                        conn.execute(insert_query, {
+                            "full_name": full_name,
+                            "email": email,
+                            "gender": gender,
+                            "nationality": nationality,
+                            "phone": phone,
+                            "cadre": cadre,
+                            "sub_specialty": sub_specialty,
+                            "start_date": start_date,
+                            "end_date": end_date,
+                            "preferred_states": ",".join(preferred_states),
+                            "preferred_lgas": preferred_lgas,
+                            "consent": consent
+                        })
+                    st.success("Registration saved to database successfully!")
+                except Exception as e:
+                    st.error("Failed to save registration.")
+                    st.write(e)
 
     if st.button("⬅ Back to Home"):
         st.session_state.page = "home"
         st.rerun()
 
-# =====================================================
-# ADMIN LOGIN PAGE
-# =====================================================
+# ----------------------
+# Admin Login Page
+# ----------------------
 elif st.session_state.page == "admin_login":
 
     st.title("Admin Login")
@@ -156,11 +199,10 @@ elif st.session_state.page == "admin_login":
     with st.form("admin_login_form"):
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-
         login = st.form_submit_button("Login")
 
         if login:
-            st.error("Admin authentication will be implemented next.")
+            st.error("Admin authentication not implemented yet.")
 
     if st.button("⬅ Back to Home"):
         st.session_state.page = "home"
