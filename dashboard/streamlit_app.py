@@ -164,5 +164,6 @@ with st.form("registration_form"):
                 )
             st.success(f"Thank you {full_name}, your registration has been saved successfully!")
 
-    st.error("❌ Database connection failed")
-    st.write(e)
+    except Exception as e:
+    st.error("Something went wrong. Please contact the administrator.")
+
